@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Public Sans", system-ui, sans-serif;
+  --color-accent: #0b6e6e;
+  --color-page: #eaf0f5;
+}
+
+body { @apply bg-page text-slate-900 antialiased; }
+
+.sidebar-scroll { scrollbar-width: none; }
+.sidebar-scroll::-webkit-scrollbar { display: none; }

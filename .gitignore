@@ -1,0 +1,23 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+
+# Local environment settings; keep example configuration shareable
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs and local tooling
+*.log
+.vscode/
+.idea/
+.qodo/
+.codex/
+.agents/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini

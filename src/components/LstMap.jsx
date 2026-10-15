@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { Crosshair, Info, LoaderCircle, MapPin, Minus, Plus, RefreshCw, TrafficCone } from 'lucide-react'
+import { Crosshair, ExternalLink, Info, LoaderCircle, LocateFixed, MapPin, Minus, Plus, RefreshCw, TrafficCone } from 'lucide-react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useFilters } from '../context'
 import { CITIES } from '../config'
 import MapLayerPicker from './MapLayerPicker'
 import { HAS_TOMTOM_KEY, HYBRID_ROADS, MAP_TYPES, TRAFFIC_ATTRIBUTION, trafficTileUrl } from '../mapLayers'
+import useMapLocation from '../hooks/useMapLocation'
+import { watchTrafficCoverage } from '../trafficCoverage'
 const control = 'inline-flex h-10 w-10 items-center justify-center bg-white text-slate-700 transition-colors hover:bg-slate-50 hover:text-indigo-700 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:text-slate-300'
 
 // Track batches rather than one failed tile: a partially loaded map is still usable.
@@ -50,6 +52,8 @@ export default function LstMap() {
   const [trafficUpdatedAt, setTrafficUpdatedAt] = useState(null)
   const [viewport, setViewport] = useState({ zoom: city.zoom, lat: city.center[0], lng: city.center[1] })
   const darkTraffic = basemap === 'dark'
+  const location = useMapLocation(mapRef, city.id)
+  const googleTrafficUrl = `https://www.google.com/maps/@?api=1&map_action=map&center=${viewport.lat},${viewport.lng}&zoom=${Math.round(viewport.zoom)}&basemap=roadmap&layer=traffic`
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -60,7 +64,7 @@ export default function LstMap() {
     mapRef.current = map
     map.createPane('traffic').style.zIndex = '450'
     map.getPane('traffic').style.pointerEvents = 'none'
-    map.createPane('roadLabels').style.zIndex = '500'
+    map.createPane('roadLabels').style.zIndex = '350'
     map.getPane('roadLabels').style.pointerEvents = 'none'
     L.control.scale({ imperial: false, position: 'bottomleft', maxWidth: 85 }).addTo(map)
     const syncViewport = () => {
@@ -119,12 +123,12 @@ export default function LstMap() {
     }
     const layer = L.tileLayer(
       trafficTileUrl(darkTraffic, trafficRefresh),
-      { pane: 'traffic', opacity: 0.9, maxZoom: 19, attribution: TRAFFIC_ATTRIBUTION },
+      { pane: 'traffic', opacity: 1, crossOrigin: 'anonymous', maxZoom: 19, attribution: TRAFFIC_ATTRIBUTION },
     )
     setTrafficStatus('loading')
-    const stopWatching = watchTiles(layer, (status) => {
+    const stopWatching = watchTrafficCoverage(layer, mapRef.current, (status) => {
       setTrafficStatus(status)
-      if (status === 'ready') setTrafficUpdatedAt(new Date())
+      if (['ready', 'empty', 'unknown'].includes(status)) setTrafficUpdatedAt(new Date())
     })
     layer.addTo(mapRef.current)
     const refresh = () => {
@@ -144,7 +148,7 @@ export default function LstMap() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-          <MapPin size={14} className="text-indigo-600" aria-hidden="true" /> {city.name}, Bangladesh
+          <MapPin size={14} className="text-indigo-600" aria-hidden="true" /> Analysis city: {city.name}
         </p>
         <span className="rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700">Basemap preview</span>
       </div>
@@ -162,12 +166,15 @@ export default function LstMap() {
       <div className="relative isolate h-80 overflow-hidden rounded-xl border border-slate-200 sm:h-90">
         <div ref={containerRef} role="region" className="lst-map h-full w-full" aria-label={`Interactive ${city.name} map. Use arrow keys to pan and plus or minus to zoom.`} />
         <div className="pointer-events-none absolute left-3 top-3 z-[500] rounded-lg border border-slate-200/80 bg-white/95 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 shadow-sm">Zoom {viewport.zoom}</div>
-        <div className="absolute right-3 top-3 z-[500] space-y-2">
+        <div className="absolute right-3 top-3 z-[500] flex flex-col items-end gap-2">
           <div className="flex flex-col divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 shadow-md shadow-slate-900/10">
             <button type="button" className={control} aria-label="Zoom in" title="Zoom in" disabled={viewport.zoom >= 19} onClick={() => mapRef.current?.zoomIn()}><Plus size={18} aria-hidden="true" /></button>
             <button type="button" className={control} aria-label="Zoom out" title="Zoom out" disabled={viewport.zoom <= 3} onClick={() => mapRef.current?.zoomOut()}><Minus size={18} aria-hidden="true" /></button>
           </div>
-          <button type="button" className={`${control} rounded-xl border border-slate-200 shadow-md shadow-slate-900/10`} aria-label={`Reset map to ${city.name}`} title={`Reset map to ${city.name}`} onClick={() => mapRef.current?.setView(city.center, city.zoom, { animate: false })}><Crosshair size={17} aria-hidden="true" /></button>
+          <button type="button" className={`${control} rounded-xl border border-slate-200 shadow-md shadow-slate-900/10 ${location.status === 'ready' ? 'text-blue-600' : ''}`} aria-label="Show my location" title="Show my location" disabled={location.status === 'locating'} onClick={location.locate}>
+            {location.status === 'locating' ? <LoaderCircle size={18} className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <LocateFixed size={18} aria-hidden="true" />}
+          </button>
+          <button type="button" className={`${control} rounded-xl border border-slate-200 shadow-md shadow-slate-900/10`} aria-label={`Reset map to ${city.name}`} title={`Reset map to ${city.name}`} onClick={() => { location.pause(); mapRef.current?.setView(city.center, city.zoom, { animate: false }) }}><Crosshair size={17} aria-hidden="true" /></button>
         </div>
         {baseStatus === 'loading' && (
           <div role="status" className="pointer-events-none absolute bottom-12 left-1/2 z-[500] inline-flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-lg bg-white/95 px-3 py-2 text-xs text-slate-600 shadow-sm"><LoaderCircle size={14} className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> Loading map…</div>
@@ -188,11 +195,25 @@ export default function LstMap() {
         <span className="tabular-nums">{Math.abs(viewport.lat).toFixed(4)}° {viewport.lat < 0 ? 'S' : 'N'}, {Math.abs(viewport.lng).toFixed(4)}° {viewport.lng < 0 ? 'W' : 'E'}</span>
       </div>
       <div className="space-y-1 border-t border-slate-100 pt-2 text-xs leading-5 text-slate-500">
+        {location.status !== 'idle' && (
+          <div role="status" className={`mb-2 rounded-lg px-3 py-2 ${location.status === 'error' ? 'bg-amber-50 text-amber-800' : 'bg-blue-50 text-blue-800'}`}>
+            <p>{location.message} {location.status === 'ready' && `Accuracy: approximately ${location.accuracy} m.`}</p>
+            <button type="button" onClick={location.stop} className="mt-1 rounded text-[11px] font-semibold underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-blue-600">{location.status === 'locating' ? 'Cancel location' : 'Stop location'}</button>
+          </div>
+        )}
         <p className="flex items-start gap-1.5"><Info size={13} className="mt-1 shrink-0 text-indigo-500" aria-hidden="true" /> Basemap preview. The LST prediction layer will be added next.</p>
         {roadsStatus === 'error' && <p className="pl-5 text-amber-700">Road labels could not load. <button type="button" onClick={() => setReload((value) => value + 1)} className="rounded font-semibold underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-indigo-600">Retry labels</button></p>}
         {!HAS_TOMTOM_KEY && <p className="pl-5">Traffic data is not connected yet.</p>}
         {trafficEnabled && (
           <div role="status" className="pl-5">
+            {trafficStatus === 'empty' && (
+              <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900">
+                <p className="font-semibold">No live traffic data for this view</p>
+                <p className="mt-1 text-[11px] leading-5">The provider returned no road traffic data for this area. This does not mean the roads are clear.</p>
+                <a href={googleTrafficUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex min-h-8 items-center gap-1.5 rounded font-semibold text-indigo-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-indigo-600">View traffic in Google Maps <ExternalLink size={12} aria-hidden="true" /></a>
+              </div>
+            )}
+            {trafficStatus === 'unknown' && <p>Traffic tiles loaded, but road coverage could not be verified for this view.</p>}
             {trafficStatus === 'error' ? <p>Traffic could not load. <button type="button" onClick={() => setTrafficRefresh((value) => value + 1)} className="rounded font-semibold text-indigo-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-indigo-600">Retry traffic</button></p> : trafficStatus === 'loading' ? 'Loading current traffic…' : trafficStatus === 'ready' ? (
               <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -206,6 +227,7 @@ export default function LstMap() {
               <p className="text-[10px]">Current road conditions, independent of prediction date. Coverage varies by area.</p>
               </div>
             ) : null}
+            {['empty', 'unknown'].includes(trafficStatus) && <button type="button" onClick={() => setTrafficRefresh((value) => value + 1)} className="inline-flex min-h-8 items-center gap-1 rounded px-1 font-semibold text-indigo-700 hover:bg-indigo-50 focus-visible:outline-2 focus-visible:outline-indigo-600"><RefreshCw size={11} aria-hidden="true" /> Refresh traffic</button>}
           </div>
         )}
       </div>

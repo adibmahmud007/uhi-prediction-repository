@@ -97,6 +97,7 @@ The home-page **Predicted LST Map** uses [Leaflet](https://leafletjs.com/) with 
 - Drag to pan, pinch to zoom, or use the **+ / −** buttons. Keyboard arrows and **+ / −** also work when the map is focused.
 - Open **Layers** to switch between **Street**, **Satellite**, **Hybrid**, **Dark**, and **Terrain** without losing the current map position. Hybrid adds TomTom roads and labels over satellite imagery; Dark uses TomTom's night map; Terrain uses OpenTopoMap contours.
 - Choose Dhaka or Sylhet in the header to recenter the map. Use the crosshair button to return to the selected city's starting view.
+- Select **Show my location** to request browser location permission. A blue dot and accuracy circle mark your device's position; the map follows updates until you drag it, select a city, or reset the view. Select the location button again to recenter, or **Stop location** to stop updates and remove the marker. Location errors explain how to retry; geolocation requires HTTPS or localhost.
 - The map currently provides geographic context only. Predicted LST overlays and the separate detail-page map are not implemented yet.
 
 To enable the optional [TomTom Orbis Traffic v2 overlay](https://docs.tomtom.com/traffic-api/documentation/tomtom-orbis-maps/v2/traffic-flow/raster-flow-tiles), Dark map, and Hybrid road labels, copy `.env.example` to `.env.local` and set a key with the corresponding Traffic and Map Display products enabled:
@@ -108,6 +109,10 @@ VITE_TOMTOM_API_KEY=your_browser_api_key
 Restart the development server after changing environment settings, or rebuild for production. When a key is configured, Traffic starts enabled and can be toggled independently of map type. Without a key, Traffic, Hybrid, and Dark are disabled; Street, Satellite, and Terrain remain available.
 
 Traffic shows current road conditions independently of the selected prediction date. It refreshes every two minutes while the page is visible, when you return to the page, and via **Refresh traffic**. The legend includes the last successful tile update time; coverage depends on the provider and location. Dark mode uses the matching dark traffic style. Unavailable traffic or road-label tiles display a retry action.
+
+The [TomTom Traffic coverage list](https://docs.tomtom.com/traffic-api/documentation/tomtom-orbis-maps/v2/product-information/market-coverage) currently excludes Bangladesh. A successful HTTP response can contain an entirely transparent tile. The dashboard checks the visible traffic pixels before showing a traffic legend, and displays **No live traffic data for this view** for empty tiles. It provides a Google Maps traffic link centered on the current view. Embedding Google's traffic inside this dashboard would require a separately configured Google Maps integration and key.
+
+Traffic is rendered above the Hybrid road geometry so available congestion colors remain visible. Browser location is requested only when you press the location button, and location watches are cleared when the map unmounts or you stop location.
 
 Vite exposes `VITE_` variables in the browser bundle. Use a browser-appropriate key with provider restrictions where available, and keep `.env.local` out of Git. The map reports unavailable tiles or traffic instead of displaying fabricated data.
 
@@ -132,6 +137,9 @@ src/
   index.css                 Theme settings and shared styles
   main.jsx                  Application entry point and providers
   mapLayers.js              Map providers, attribution, and traffic tile URLs
+  trafficCoverage.js        Visible traffic tile coverage detection
+  hooks/
+    useMapLocation.js       Browser location watch and blue-dot controls
 index.html                  HTML entry point and font loading
 vite.config.js              React and Tailwind build configuration
 ```

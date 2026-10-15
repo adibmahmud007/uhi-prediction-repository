@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Card from '../components/Card'
 import KpiCard from '../components/KpiCard'
+import LstMap from '../components/LstMap'
 import { WIDGETS, KPIS } from '../config'
 
 const Placeholder = ({ h = 'h-48' }) => (
@@ -31,7 +32,7 @@ export default function Home() {
             className={w.span}
             action={<Link to={`/${w.id}`} className="text-xs font-semibold text-accent hover:underline">Details</Link>}
           >
-            <Placeholder />
+            {w.id === 'lst-map' ? <LstMap /> : <Placeholder />}
           </Card>
         ))}
       </div>

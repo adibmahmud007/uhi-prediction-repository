@@ -21,6 +21,9 @@ export const KPIS = [
   { id: 'vegetation-cover', label: 'Vegetation Cover', value: '18.6', unit: '%', description: 'Share of land with vegetation', icon: Leaf, color: 'teal' },
   { id: 'water-bodies', label: 'Water Bodies', value: '6.3', unit: '%', description: 'Share of land covered by water', icon: Droplets, color: 'blue' },
 ]
-export const CITIES = [{ id: 'dhaka', name: 'Dhaka' }, { id: 'sylhet', name: 'Sylhet' }]
+export const CITIES = [
+  { id: 'dhaka', name: 'Dhaka', center: [23.8103, 90.4125], zoom: 12 },
+  { id: 'sylhet', name: 'Sylhet', center: [24.8949, 91.8687], zoom: 12 },
+]
 export const SCALES = [{ id: 'daily', name: 'Daily' }, { id: 'monthly', name: 'Monthly' }, { id: 'yearly', name: 'Yearly' }]
 export const SCENARIOS = [{ id: 'ssp245', name: 'SSP2-4.5' }, { id: 'ssp585', name: 'SSP5-8.5' }]

@@ -22,11 +22,12 @@
 Urban Heat Island Analytics provides a responsive interface for presenting land surface temperature (LST), urban heat island (UHI) intensity, heat exposure, and environmental coverage. It brings key indicators, scenario controls, and dedicated analysis routes into one workspace.
 
 > [!NOTE]
-> This repository currently contains a frontend prototype. KPI values are static examples, charts and maps are placeholders, and the **Run prediction** button is a UI control without a prediction handler. No backend, trained model, or live data source is connected. Changing filters updates their selection state; it does not recalculate the displayed metrics.
+> This repository currently contains a frontend prototype. KPI values are static examples, most charts and detail views are placeholders, and the **Run prediction** button is a UI control without a prediction handler. The home-page LST card contains an interactive basemap, but no backend, trained model, or predicted temperature layer is connected. Changing location recenters the map; changing filters does not recalculate the summary metrics.
 
 ## Dashboard experience
 
 - **Six summary cards** with distinct icons, clear units, and coordinated accents.
+- **An interactive home-page map** with a visual layer picker, five map types, zoom controls, city reset, and optional current traffic.
 - **Prediction controls** for location, date, temporal scale, and climate scenario.
 - **A dark header** with a light control palette and a blue–indigo action gradient.
 - **An animated navigation drawer** with grouped links, active-route highlighting, and a scrollable menu with a hidden scrollbar.
@@ -89,6 +90,27 @@ npm run preview
 
 No environment variables or API keys are required for the current prototype.
 
+### Interactive map and optional traffic
+
+The home-page **Predicted LST Map** uses [Leaflet](https://leafletjs.com/) with OpenStreetMap, Esri World Imagery, OpenTopoMap, and TomTom layers. Provider credits remain visible on the map. Internet access is needed to load external map tiles.
+
+- Drag to pan, pinch to zoom, or use the **+ / −** buttons. Keyboard arrows and **+ / −** also work when the map is focused.
+- Open **Layers** to switch between **Street**, **Satellite**, **Hybrid**, **Dark**, and **Terrain** without losing the current map position. Hybrid adds TomTom roads and labels over satellite imagery; Dark uses TomTom's night map; Terrain uses OpenTopoMap contours.
+- Choose Dhaka or Sylhet in the header to recenter the map. Use the crosshair button to return to the selected city's starting view.
+- The map currently provides geographic context only. Predicted LST overlays and the separate detail-page map are not implemented yet.
+
+To enable the optional [TomTom Orbis Traffic v2 overlay](https://docs.tomtom.com/traffic-api/documentation/tomtom-orbis-maps/v2/traffic-flow/raster-flow-tiles), Dark map, and Hybrid road labels, copy `.env.example` to `.env.local` and set a key with the corresponding Traffic and Map Display products enabled:
+
+```dotenv
+VITE_TOMTOM_API_KEY=your_browser_api_key
+```
+
+Restart the development server after changing environment settings, or rebuild for production. When a key is configured, Traffic starts enabled and can be toggled independently of map type. Without a key, Traffic, Hybrid, and Dark are disabled; Street, Satellite, and Terrain remain available.
+
+Traffic shows current road conditions independently of the selected prediction date. It refreshes every two minutes while the page is visible, when you return to the page, and via **Refresh traffic**. The legend includes the last successful tile update time; coverage depends on the provider and location. Dark mode uses the matching dark traffic style. Unavailable traffic or road-label tiles display a retry action.
+
+Vite exposes `VITE_` variables in the browser bundle. Use a browser-appropriate key with provider restrictions where available, and keep `.env.local` out of Git. The map reports unavailable tiles or traffic instead of displaying fabricated data.
+
 ## Project structure
 
 ```text
@@ -98,6 +120,8 @@ src/
     Card.jsx                Shared content container
     FilterBar.jsx           Location, date, scale, and scenario controls
     KpiCard.jsx             Summary metric presentation
+    LstMap.jsx              Interactive basemap and optional traffic overlay
+    MapLayerPicker.jsx      Visual map-type selector
     Sidebar.jsx             Navigation drawer and active-route styling
   pages/
     Home.jsx                Dashboard overview and widget grid
@@ -107,6 +131,7 @@ src/
   context.jsx               Shared filter state and initial selections
   index.css                 Theme settings and shared styles
   main.jsx                  Application entry point and providers
+  mapLayers.js              Map providers, attribution, and traffic tile URLs
 index.html                  HTML entry point and font loading
 vite.config.js              React and Tailwind build configuration
 ```
@@ -118,6 +143,10 @@ vite.config.js              React and Tailwind build configuration
 | Metric labels, values, units, and icons | `KPIS` in `src/config.js` |
 | Widget titles, routes, descriptions, and grid spans | `WIDGETS` in `src/config.js` |
 | Cities, temporal scales, and scenarios | `CITIES`, `SCALES`, and `SCENARIOS` in `src/config.js` |
+| City map centers and initial zoom | `CITIES` in `src/config.js` |
+| Map providers and tile URLs | `src/mapLayers.js` |
+| Map controls and traffic refresh behavior | `src/components/LstMap.jsx` |
+| Map-type picker layout | `src/components/MapLayerPicker.jsx` |
 | Initial filter selections | `src/context.jsx` |
 | KPI accent palettes and card layout | `src/components/KpiCard.jsx` |
 | Header branding and layout | `src/App.jsx` |

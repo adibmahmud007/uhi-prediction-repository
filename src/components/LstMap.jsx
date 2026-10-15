@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Crosshair, ExternalLink, Info, LoaderCircle, LocateFixed, MapPin, Minus, Plus, RefreshCw, TrafficCone } from 'lucide-react'
+import { Crosshair, LoaderCircle, LocateFixed, MapPin, Minus, Plus, RefreshCw, TrafficCone } from 'lucide-react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useFilters } from '../context'
@@ -47,13 +47,10 @@ export default function LstMap() {
   const [baseStatus, setBaseStatus] = useState('loading')
   const [trafficEnabled, setTrafficEnabled] = useState(HAS_TOMTOM_KEY)
   const [trafficStatus, setTrafficStatus] = useState('idle')
-  const [roadsStatus, setRoadsStatus] = useState('idle')
   const [trafficRefresh, setTrafficRefresh] = useState(0)
-  const [trafficUpdatedAt, setTrafficUpdatedAt] = useState(null)
   const [viewport, setViewport] = useState({ zoom: city.zoom, lat: city.center[0], lng: city.center[1] })
   const darkTraffic = basemap === 'dark'
   const location = useMapLocation(mapRef, city.id)
-  const googleTrafficUrl = `https://www.google.com/maps/@?api=1&map_action=map&center=${viewport.lat},${viewport.lng}&zoom=${Math.round(viewport.zoom)}&basemap=roadmap&layer=traffic`
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -105,20 +102,15 @@ export default function LstMap() {
   }, [basemap, reload])
 
   useEffect(() => {
-    if (basemap !== 'hybrid' || !HAS_TOMTOM_KEY) {
-      setRoadsStatus('idle')
-      return
-    }
+    if (basemap !== 'hybrid' || !HAS_TOMTOM_KEY) return
     const layer = L.tileLayer(HYBRID_ROADS.url, { pane: 'roadLabels', attribution: HYBRID_ROADS.attribution, maxZoom: 19 })
-    const stopWatching = watchTiles(layer, setRoadsStatus)
     layer.addTo(mapRef.current)
-    return () => { stopWatching(); layer.remove() }
+    return () => { layer.remove() }
   }, [basemap, reload])
 
   useEffect(() => {
     if (!HAS_TOMTOM_KEY || !trafficEnabled) {
       setTrafficStatus('idle')
-      setTrafficUpdatedAt(null)
       return
     }
     const layer = L.tileLayer(
@@ -126,10 +118,7 @@ export default function LstMap() {
       { pane: 'traffic', opacity: 1, crossOrigin: 'anonymous', maxZoom: 19, attribution: TRAFFIC_ATTRIBUTION },
     )
     setTrafficStatus('loading')
-    const stopWatching = watchTrafficCoverage(layer, mapRef.current, (status) => {
-      setTrafficStatus(status)
-      if (['ready', 'empty', 'unknown'].includes(status)) setTrafficUpdatedAt(new Date())
-    })
+    const stopWatching = watchTrafficCoverage(layer, mapRef.current, setTrafficStatus)
     layer.addTo(mapRef.current)
     const refresh = () => {
       if (document.visibilityState === 'visible') layer.setUrl(trafficTileUrl(darkTraffic, trafficRefresh), true).redraw()
@@ -171,7 +160,7 @@ export default function LstMap() {
             <button type="button" className={control} aria-label="Zoom in" title="Zoom in" disabled={viewport.zoom >= 19} onClick={() => mapRef.current?.zoomIn()}><Plus size={18} aria-hidden="true" /></button>
             <button type="button" className={control} aria-label="Zoom out" title="Zoom out" disabled={viewport.zoom <= 3} onClick={() => mapRef.current?.zoomOut()}><Minus size={18} aria-hidden="true" /></button>
           </div>
-          <button type="button" className={`${control} rounded-xl border border-slate-200 shadow-md shadow-slate-900/10 ${location.status === 'ready' ? 'text-blue-600' : ''}`} aria-label="Show my location" title="Show my location" disabled={location.status === 'locating'} onClick={location.locate}>
+          <button type="button" className={`${control} rounded-xl border border-slate-200 shadow-md shadow-slate-900/10 ${location.status === 'ready' ? 'text-blue-600' : ''}`} aria-label="Show my location" title={location.status === 'error' ? location.message : 'Show my location'} disabled={location.status === 'locating'} onClick={location.locate}>
             {location.status === 'locating' ? <LoaderCircle size={18} className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <LocateFixed size={18} aria-hidden="true" />}
           </button>
           <button type="button" className={`${control} rounded-xl border border-slate-200 shadow-md shadow-slate-900/10`} aria-label={`Reset map to ${city.name}`} title={`Reset map to ${city.name}`} onClick={() => { location.pause(); mapRef.current?.setView(city.center, city.zoom, { animate: false }) }}><Crosshair size={17} aria-hidden="true" /></button>
@@ -194,42 +183,10 @@ export default function LstMap() {
         <span>Drag to explore · Pinch or use + / − to zoom</span>
         <span className="tabular-nums">{Math.abs(viewport.lat).toFixed(4)}° {viewport.lat < 0 ? 'S' : 'N'}, {Math.abs(viewport.lng).toFixed(4)}° {viewport.lng < 0 ? 'W' : 'E'}</span>
       </div>
-      <div className="space-y-1 border-t border-slate-100 pt-2 text-xs leading-5 text-slate-500">
-        {location.status !== 'idle' && (
-          <div role="status" className={`mb-2 rounded-lg px-3 py-2 ${location.status === 'error' ? 'bg-amber-50 text-amber-800' : 'bg-blue-50 text-blue-800'}`}>
-            <p>{location.message} {location.status === 'ready' && `Accuracy: approximately ${location.accuracy} m.`}</p>
-            <button type="button" onClick={location.stop} className="mt-1 rounded text-[11px] font-semibold underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-blue-600">{location.status === 'locating' ? 'Cancel location' : 'Stop location'}</button>
-          </div>
-        )}
-        <p className="flex items-start gap-1.5"><Info size={13} className="mt-1 shrink-0 text-indigo-500" aria-hidden="true" /> Basemap preview. The LST prediction layer will be added next.</p>
-        {roadsStatus === 'error' && <p className="pl-5 text-amber-700">Road labels could not load. <button type="button" onClick={() => setReload((value) => value + 1)} className="rounded font-semibold underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-indigo-600">Retry labels</button></p>}
-        {!HAS_TOMTOM_KEY && <p className="pl-5">Traffic data is not connected yet.</p>}
-        {trafficEnabled && (
-          <div role="status" className="pl-5">
-            {trafficStatus === 'empty' && (
-              <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900">
-                <p className="font-semibold">No live traffic data for this view</p>
-                <p className="mt-1 text-[11px] leading-5">The provider returned no road traffic data for this area. This does not mean the roads are clear.</p>
-                <a href={googleTrafficUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex min-h-8 items-center gap-1.5 rounded font-semibold text-indigo-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-indigo-600">View traffic in Google Maps <ExternalLink size={12} aria-hidden="true" /></a>
-              </div>
-            )}
-            {trafficStatus === 'unknown' && <p>Traffic tiles loaded, but road coverage could not be verified for this view.</p>}
-            {trafficStatus === 'error' ? <p>Traffic could not load. <button type="button" onClick={() => setTrafficRefresh((value) => value + 1)} className="rounded font-semibold text-indigo-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-indigo-600">Retry traffic</button></p> : trafficStatus === 'loading' ? 'Loading current traffic…' : trafficStatus === 'ready' ? (
-              <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span>Current traffic:</span>
-                {['Congested', 'Slow', 'Free-flow'].map((label, index) => <span key={label} className="inline-flex items-center gap-1"><span aria-hidden="true" className={`h-1.5 w-3 rounded-full ${['bg-red-500', 'bg-amber-400', 'bg-emerald-500'][index]}`} />{label}</span>)}
-              </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
-                <span>{trafficUpdatedAt && `Updated ${trafficUpdatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`} · Refreshes every 2 min</span>
-                <button type="button" onClick={() => setTrafficRefresh((value) => value + 1)} className="inline-flex min-h-7 items-center gap-1 rounded px-1 font-semibold text-indigo-700 hover:bg-indigo-50 focus-visible:outline-2 focus-visible:outline-indigo-600"><RefreshCw size={11} aria-hidden="true" /> Refresh traffic</button>
-              </div>
-              <p className="text-[10px]">Current road conditions, independent of prediction date. Coverage varies by area.</p>
-              </div>
-            ) : null}
-            {['empty', 'unknown'].includes(trafficStatus) && <button type="button" onClick={() => setTrafficRefresh((value) => value + 1)} className="inline-flex min-h-8 items-center gap-1 rounded px-1 font-semibold text-indigo-700 hover:bg-indigo-50 focus-visible:outline-2 focus-visible:outline-indigo-600"><RefreshCw size={11} aria-hidden="true" /> Refresh traffic</button>}
-          </div>
-        )}
+      <div className="border-t border-slate-100 pt-2">
+        <button type="button" onClick={() => setTrafficRefresh((value) => value + 1)} disabled={!HAS_TOMTOM_KEY || !trafficEnabled || trafficStatus === 'loading'} aria-busy={trafficStatus === 'loading'} className="inline-flex min-h-8 items-center gap-1.5 rounded px-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50">
+          <RefreshCw size={12} className={trafficStatus === 'loading' ? 'animate-spin motion-reduce:animate-none' : ''} aria-hidden="true" /> Refresh traffic
+        </button>
       </div>
     </div>
   )

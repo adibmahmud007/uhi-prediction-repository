@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import Card from '../components/Card'
 import KpiCard from '../components/KpiCard'
 import LstMap from '../components/LstMap'
+import LstTrendPreview from '../components/LstTrendPreview'
 import { WIDGETS, KPIS } from '../config'
 
 const Placeholder = ({ h = 'h-48' }) => (
@@ -32,7 +33,10 @@ export default function Home() {
             className={w.span}
             action={<Link to={`/${w.id}`} className="text-xs font-semibold text-accent hover:underline">Details</Link>}
           >
-            {w.id === 'lst-map' ? <LstMap /> : <Placeholder />}
+            {w.id === 'lst-map' && <LstMap />}
+            {w.id === 'uhi-map' && <LstMap mode="uhi" />}
+            {w.id === 'lst-trend' && <LstTrendPreview />}
+            {!['lst-map', 'uhi-map', 'lst-trend'].includes(w.id) && <Placeholder />}
           </Card>
         ))}
       </div>

@@ -90,31 +90,11 @@ npm run preview
 
 No environment variables or API keys are required for the current prototype.
 
-### Interactive map and optional traffic
+### Interactive thermal previews
 
-The home-page **Predicted LST Map** uses [Leaflet](https://leafletjs.com/) with OpenStreetMap, Esri World Imagery, OpenTopoMap, and TomTom layers. Provider credits remain visible on the map. Internet access is needed to load external map tiles.
+The home page presents equal-width **Predicted LST**, **UHI Intensity**, and **LST Trend** cards in its primary analysis row. The LST and UHI cards show Bangladesh with Dhaka District highlighted, plus a detailed zoomed view containing 20 numbered monitoring points. Select a point such as Mirpur to open its land surface temperature, air temperature, and UHI intensity in a compact map popup. Zoom controls move between the country, district, and monitoring-point views; after zooming, drag the map to pan in any direction. The Bangladesh overview shrinks as the main map zooms and marks the visible viewport. District boundaries come from [geoBoundaries](https://www.geoboundaries.org/) (Bangladesh ADM2, CC BY 3.0 IGO; source: Bangladesh Bureau of Statistics and OCHA ROAP).
 
-- Drag to pan, pinch to zoom, or use the **+ / −** buttons. Keyboard arrows and **+ / −** also work when the map is focused.
-- Open **Layers** to switch between **Street**, **Satellite**, **Hybrid**, **Dark**, and **Terrain** without losing the current map position. Hybrid adds TomTom roads and labels over satellite imagery; Dark uses TomTom's night map; Terrain uses OpenTopoMap contours.
-- Choose Dhaka or Sylhet in the header to recenter the map. Use the crosshair button to return to the selected city's starting view.
-- Select **Show my location** to request browser location permission. A blue dot and accuracy circle mark your device's position; the map follows updates until you drag it, select a city, or reset the view. Select the location button again to recenter. Location errors are available in the location button's tooltip; geolocation requires HTTPS or localhost.
-- The map currently provides geographic context only. Predicted LST overlays and the separate detail-page map are not implemented yet.
-
-To enable the optional [TomTom Orbis Traffic v2 overlay](https://docs.tomtom.com/traffic-api/documentation/tomtom-orbis-maps/v2/traffic-flow/raster-flow-tiles), Dark map, and Hybrid road labels, copy `.env.example` to `.env.local` and set a key with the corresponding Traffic and Map Display products enabled:
-
-```dotenv
-VITE_TOMTOM_API_KEY=your_browser_api_key
-```
-
-Restart the development server after changing environment settings, or rebuild for production. When a key is configured, Traffic starts enabled and can be toggled independently of map type. Without a key, Traffic, Hybrid, and Dark are disabled; Street, Satellite, and Terrain remain available.
-
-Traffic shows current road conditions independently of the selected prediction date. It refreshes every two minutes while the page is visible, when you return to the page, and via **Refresh traffic**. Coverage depends on the provider and location. Dark mode uses the matching dark traffic style. The map footer keeps only the refresh action, with a loading indicator while traffic reloads.
-
-The [TomTom Traffic coverage list](https://docs.tomtom.com/traffic-api/documentation/tomtom-orbis-maps/v2/product-information/market-coverage) currently excludes Bangladesh. A successful HTTP response can contain an entirely transparent tile. The dashboard checks visible traffic pixels internally; no extra coverage notices or external traffic links appear below the map. Embedding Google's traffic inside this dashboard would require a separately configured Google Maps integration and key.
-
-Traffic is rendered above the Hybrid road geometry so available congestion colors remain visible. Browser location is requested only when you press the location button, and location watches are cleared when the map unmounts.
-
-Vite exposes `VITE_` variables in the browser bundle. Use a browser-appropriate key with provider restrictions where available, and keep `.env.local` out of Git. The map reports unavailable tiles or traffic instead of displaying fabricated data.
+The values are intentionally marked as demonstration data. They do not represent satellite observations or model results yet. The interaction and layout are ready to receive Google Earth Engine or prediction-model outputs later.
 
 ## Project structure
 

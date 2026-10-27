@@ -2,10 +2,10 @@
 import { Thermometer, Flame, BarChart3, TrendingUp, CalendarDays, Leaf, GitBranch, Lightbulb, MapPin, Users, Droplets } from 'lucide-react'
 
 export const WIDGETS = [
-  { id: 'lst-map', title: 'Predicted LST Map', icon: Thermometer, span: 'lg:col-span-5', desc: '...' },
+  { id: 'lst-map', title: 'Predicted LST Map', icon: Thermometer, span: 'lg:col-span-4', desc: '...' },
   { id: 'uhi-map', title: 'UHI intensity Map', icon: Flame, span: 'lg:col-span-4', desc: '...' },
+  { id: 'lst-trend', title: 'LST trend', icon: TrendingUp, span: 'lg:col-span-4', desc: '...' },
   { id: 'hotspot-distribution', title: 'Heat-Risk Distribution', icon: BarChart3, span: 'lg:col-span-3', desc: '...' },
-  { id: 'lst-trend', title: 'LST trend', icon: TrendingUp, span: 'lg:col-span-6', desc: '...' },
   { id: 'seasonal', title: 'Seasonal Comparison', icon: CalendarDays, span: 'lg:col-span-3', desc: '...' },
   { id: 'env-factors', title: 'Environmental Factors', icon: Leaf, span: 'lg:col-span-3', desc: '...' },
   { id: 'hotspot-evolution', title: 'Hotspot Evolution', icon: GitBranch, span: 'lg:col-span-6', desc: '...' },

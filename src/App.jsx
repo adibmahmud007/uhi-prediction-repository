@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import FilterBar from './components/FilterBar'
+import StartupLogoModal from './components/StartupLogoModal'
 import Home from './pages/Home'
 import Detail from './pages/Detail'
 
@@ -9,6 +10,7 @@ export default function App() {
   const [open, setOpen] = useState(false)
   return (
     <>
+      <StartupLogoModal />
       <Sidebar open={open} onClose={() => setOpen(false)} />
       <header className="border-b border-blue-900/60 bg-gray-800 font-sans shadow-[0_8px_28px_-16px_rgba(15,23,42,0.5)]">
         <div className="mx-auto max-w-7xl space-y-5 px-4 py-5">

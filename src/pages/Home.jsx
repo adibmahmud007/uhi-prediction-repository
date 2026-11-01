@@ -3,6 +3,9 @@ import Card from '../components/Card'
 import KpiCard from '../components/KpiCard'
 import LstMap from '../components/LstMap'
 import LstTrendPreview from '../components/LstTrendPreview'
+import HeatRiskDistribution from '../components/HeatRiskDistribution'
+import SeasonalComparison from '../components/SeasonalComparison'
+import EnvironmentalFactors from '../components/EnvironmentalFactors'
 import { WIDGETS, KPIS } from '../config'
 
 const Placeholder = ({ h = 'h-48' }) => (
@@ -36,7 +39,10 @@ export default function Home() {
             {w.id === 'lst-map' && <LstMap />}
             {w.id === 'uhi-map' && <LstMap mode="uhi" />}
             {w.id === 'lst-trend' && <LstTrendPreview />}
-            {!['lst-map', 'uhi-map', 'lst-trend'].includes(w.id) && <Placeholder />}
+            {w.id === 'hotspot-distribution' && <HeatRiskDistribution />}
+            {w.id === 'seasonal' && <SeasonalComparison />}
+            {w.id === 'env-factors' && <EnvironmentalFactors />}
+            {!['lst-map', 'uhi-map', 'lst-trend', 'hotspot-distribution', 'seasonal', 'env-factors'].includes(w.id) && <Placeholder />}
           </Card>
         ))}
       </div>

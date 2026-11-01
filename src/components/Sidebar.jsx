@@ -44,7 +44,7 @@ export default function Sidebar({ open, onClose }) {
         id="navigation-panel"
         aria-hidden={!open}
         inert={open ? undefined : ''}
-        className={`fixed inset-y-0 left-0 z-50 flex w-88 max-w-[calc(100vw-1rem)] flex-col border-r border-white/10 bg-gray-800 font-sans text-white shadow-2xl shadow-black/30 transition-transform duration-200 motion-reduce:transition-none ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-88 max-w-[calc(100vw-1rem)] flex-col border-r border-white/10 bg-[#0b1220] font-sans text-white shadow-2xl shadow-black/30 transition-transform duration-200 motion-reduce:transition-none ${open ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="flex shrink-0 items-center gap-3 border-b border-white/10 px-5 py-5">
           <img src="/logo-header-dark-bg.png" alt="" width={40} height={40} className="h-10 w-10 shrink-0 object-contain" />

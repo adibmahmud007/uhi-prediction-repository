@@ -214,7 +214,7 @@ export default function LstMap({ mode = 'lst' }) {
         {!map ? (
           <div role="status" className="grid h-full place-items-center text-xs font-semibold text-blue-100">Loading Bangladesh map…</div>
         ) : (
-          <svg viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`} role="img" aria-labelledby={`${rawId}-title ${rawId}-description`} onPointerDown={startPan} onPointerMove={movePan} onPointerUp={endPan} onPointerCancel={endPan} className={`block h-full w-full select-none ${zoom > 0 ? 'cursor-grab active:cursor-grabbing' : ''}`} style={{ touchAction: 'none' }} preserveAspectRatio="xMidYMid meet">
+          <svg viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`} role="img" aria-labelledby={`${rawId}-title ${rawId}-description`} onPointerDown={startPan} onPointerMove={movePan} onPointerUp={endPan} onPointerCancel={endPan} className={`block h-full w-full select-none ${zoom > 0 ? 'cursor-grab active:cursor-grabbing' : ''}`} style={{ touchAction: 'pan-y' }} preserveAspectRatio="xMidYMid meet">
             <title id={`${rawId}-title`}>Bangladesh map with Dhaka District highlighted and 20 selectable locations</title>
             <desc id={`${rawId}-description`}>Use the zoom controls, drag the zoomed map in any direction, then select a numbered location to view its temperature values.</desc>
             <defs>

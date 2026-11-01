@@ -12,7 +12,7 @@ export default function App() {
     <>
       <StartupLogoModal />
       <Sidebar open={open} onClose={() => setOpen(false)} />
-      <header className="border-b border-blue-900/60 bg-gray-800 font-sans shadow-[0_8px_28px_-16px_rgba(15,23,42,0.5)]">
+      <header className="border-b border-blue-900/60 bg-[#0b1220] font-sans shadow-[0_8px_28px_-16px_rgba(15,23,42,0.5)]">
         <div className="mx-auto max-w-7xl space-y-5 px-4 py-5">
           <div className="flex min-w-0 items-center gap-3">
             <button type="button" onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={open} aria-controls="navigation-panel" className="group inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-slate-100 shadow-sm shadow-black/20 transition-[background-color,border-color,box-shadow] duration-200 hover:border-blue-200 hover:bg-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-200 motion-reduce:transition-none">

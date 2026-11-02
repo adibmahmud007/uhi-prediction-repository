@@ -120,10 +120,17 @@ export default function LstMap({ mode = 'lst' }) {
   const [zoom, setZoom] = useState(0)
   const [selectedIndex, setSelectedIndex] = useState(null)
   const [pan, setPan] = useState({ x: 0, y: 0 })
+  const [animatedViewBox, setAnimatedViewBox] = useState(null)
+  const [isAnimating, setIsAnimating] = useState(false)
   const dragRef = useRef(null)
   const suppressClickRef = useRef(false)
+  const animationRef = useRef({ delayId: null, frameId: null })
 
   useEffect(() => setPan({ x: 0, y: 0 }), [zoom])
+  useEffect(() => () => {
+    if (animationRef.current.delayId) window.clearTimeout(animationRef.current.delayId)
+    if (animationRef.current.frameId) window.cancelAnimationFrame(animationRef.current.frameId)
+  }, [])
 
   const map = useMemo(() => {
     if (!features.length) return null
@@ -165,6 +172,7 @@ export default function LstMap({ mode = 'lst' }) {
   const selected = selectedIndex === null ? null : map?.locations[selectedIndex]
   const box = map?.boxes[zoom] || { x: 0, y: 0, width: MAP_WIDTH, height: MAP_HEIGHT }
   const viewBox = { ...box, x: box.x + pan.x, y: box.y + pan.y }
+  const displayedViewBox = animatedViewBox || viewBox
   const unitScale = box.width / MAP_WIDTH
   const gradient = `linear-gradient(90deg, ${visual.colors.join(',')})`
   const heatColor = (location) => {
@@ -176,7 +184,7 @@ export default function LstMap({ mode = 'lst' }) {
   }
   const startPan = (event) => {
     suppressClickRef.current = false
-    if (zoom === 0) return
+    if (zoom === 0 || isAnimating) return
     if (event.target.closest?.('[data-map-marker]')) return
     event.currentTarget.setPointerCapture(event.pointerId)
     dragRef.current = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, panX: pan.x, panY: pan.y, moved: false }
@@ -202,6 +210,43 @@ export default function LstMap({ mode = 'lst' }) {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
     dragRef.current = null
   }
+  const toggleFocusZoom = () => {
+    if (!map || isAnimating) return
+    const targetZoom = zoom === 3 ? 0 : 3
+    const startBox = { ...viewBox }
+    const targetBox = map.boxes[targetZoom]
+    const duration = 850
+
+    setIsAnimating(true)
+    animationRef.current.delayId = window.setTimeout(() => {
+      const startedAt = window.performance.now()
+      const animate = (now) => {
+        const progress = Math.min(1, (now - startedAt) / duration)
+        const eased = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2
+
+        setAnimatedViewBox({
+          x: startBox.x + (targetBox.x - startBox.x) * eased,
+          y: startBox.y + (targetBox.y - startBox.y) * eased,
+          width: startBox.width + (targetBox.width - startBox.width) * eased,
+          height: startBox.height + (targetBox.height - startBox.height) * eased,
+        })
+
+        if (progress < 1) {
+          animationRef.current.frameId = window.requestAnimationFrame(animate)
+          return
+        }
+
+        setZoom(targetZoom)
+        setPan({ x: 0, y: 0 })
+        setAnimatedViewBox(null)
+        setIsAnimating(false)
+        animationRef.current = { delayId: null, frameId: null }
+      }
+      animationRef.current.frameId = window.requestAnimationFrame(animate)
+    }, 120)
+  }
 
   return (
     <div className="space-y-3">
@@ -214,7 +259,7 @@ export default function LstMap({ mode = 'lst' }) {
         {!map ? (
           <div role="status" className="grid h-full place-items-center text-xs font-semibold text-blue-100">Loading Bangladesh map…</div>
         ) : (
-          <svg viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`} role="img" aria-labelledby={`${rawId}-title ${rawId}-description`} onPointerDown={startPan} onPointerMove={movePan} onPointerUp={endPan} onPointerCancel={endPan} className={`block h-full w-full select-none ${zoom > 0 ? 'cursor-grab active:cursor-grabbing' : ''}`} style={{ touchAction: 'pan-y' }} preserveAspectRatio="xMidYMid meet">
+          <svg viewBox={`${displayedViewBox.x} ${displayedViewBox.y} ${displayedViewBox.width} ${displayedViewBox.height}`} role="img" aria-labelledby={`${rawId}-title ${rawId}-description`} onPointerDown={startPan} onPointerMove={movePan} onPointerUp={endPan} onPointerCancel={endPan} className={`block h-full w-full select-none ${zoom > 0 && !isAnimating ? 'cursor-grab active:cursor-grabbing' : ''}`} style={{ touchAction: 'pan-y' }} preserveAspectRatio="xMidYMid meet">
             <title id={`${rawId}-title`}>Bangladesh map with Dhaka District highlighted and 20 selectable locations</title>
             <desc id={`${rawId}-description`}>Use the zoom controls, drag the zoomed map in any direction, then select a numbered location to view its temperature values.</desc>
             <defs>
@@ -266,9 +311,9 @@ export default function LstMap({ mode = 'lst' }) {
         <div className="pointer-events-none absolute left-3 top-3 rounded-lg border border-white/15 bg-slate-950/85 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.11em] text-white shadow-lg backdrop-blur-md"><Thermometer size={11} className="mr-1 inline text-blue-200" aria-hidden="true" /> {visual.range}</div>
 
         <div className="absolute right-3 top-3 flex flex-col overflow-hidden rounded-xl border border-white/30 bg-white/95 text-slate-700 shadow-lg backdrop-blur-md">
-          <button type="button" aria-label="Zoom in" title="Zoom in" disabled={zoom === 4} onClick={() => setZoom((value) => Math.min(4, value + 1))} className="grid h-9 w-9 place-items-center hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:text-slate-300"><Plus size={16} strokeWidth={2.3} aria-hidden="true" /></button>
-          <button type="button" aria-label="Focus Dhaka locations" title="Focus Dhaka locations" onClick={() => setZoom(3)} className="grid h-9 w-9 place-items-center border-y border-slate-200 hover:bg-indigo-50 hover:text-indigo-700"><LocateFixed size={15} strokeWidth={2.2} aria-hidden="true" /></button>
-          <button type="button" aria-label="Zoom out" title="Zoom out" disabled={zoom === 0} onClick={() => setZoom((value) => Math.max(0, value - 1))} className="grid h-9 w-9 place-items-center hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:text-slate-300"><Minus size={16} strokeWidth={2.3} aria-hidden="true" /></button>
+          <button type="button" aria-label="Zoom in" title="Zoom in" disabled={zoom === 4 || isAnimating} onClick={() => setZoom((value) => Math.min(4, value + 1))} className="grid h-9 w-9 place-items-center hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:text-slate-300"><Plus size={16} strokeWidth={2.3} aria-hidden="true" /></button>
+          <button type="button" aria-label={zoom === 3 ? 'Zoom out to Bangladesh' : 'Focus Dhaka locations'} title={zoom === 3 ? 'Zoom out to Bangladesh' : 'Focus Dhaka locations'} disabled={isAnimating} onClick={toggleFocusZoom} className="grid h-9 w-9 place-items-center border-y border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-wait disabled:text-indigo-300"><LocateFixed size={15} strokeWidth={2.2} className={isAnimating ? 'animate-pulse' : ''} aria-hidden="true" /></button>
+          <button type="button" aria-label="Zoom out" title="Zoom out" disabled={zoom === 0 || isAnimating} onClick={() => setZoom((value) => Math.max(0, value - 1))} className="grid h-9 w-9 place-items-center hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:text-slate-300"><Minus size={16} strokeWidth={2.3} aria-hidden="true" /></button>
         </div>
 
         {selected && (
@@ -288,7 +333,7 @@ export default function LstMap({ mode = 'lst' }) {
             <svg viewBox="0 0 440 390" className="h-full w-full">
               {map.districts.map((district) => <path key={district.name} d={district.path} fill={district.name === 'Dhaka' ? '#f97316' : '#315995'} stroke="#bfdbfe" strokeWidth="1" />)}
               <path d={map.dhaka.path} fill="none" stroke="#fff" strokeWidth="4" />
-              <rect x={viewBox.x} y={viewBox.y} width={viewBox.width} height={viewBox.height} fill="none" stroke="#fef08a" strokeWidth={Math.max(2, 5 * unitScale)} />
+              <rect x={displayedViewBox.x} y={displayedViewBox.y} width={displayedViewBox.width} height={displayedViewBox.height} fill="none" stroke="#fef08a" strokeWidth={Math.max(2, 5 * unitScale)} />
             </svg>
             <span className="absolute left-1.5 top-1 text-[7px] font-bold tracking-wider text-white">BD</span>
           </div>

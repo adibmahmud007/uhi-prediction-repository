@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import Card from '../components/Card'
 import KpiCard from '../components/KpiCard'
-import LstMap from '../components/LstMap'
+import LstMap from '../components/RealLstMap'
 import LstTrendPreview from '../components/LstTrendPreview'
 import HeatRiskDistribution from '../components/HeatRiskDistribution'
 import SeasonalComparison from '../components/SeasonalComparison'

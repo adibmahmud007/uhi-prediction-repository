@@ -116,7 +116,7 @@ export default function KpiCard({ metric }) {
   }
 
   return (
-    <Card className="group relative flex min-h-[280px] min-w-0 flex-col overflow-hidden border-slate-200/90 bg-linear-to-b from-white to-slate-50/90 shadow-[0_14px_32px_-20px_rgba(15,23,42,0.42)] transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_20px_38px_-20px_rgba(15,23,42,0.5)] motion-reduce:transform-none motion-reduce:transition-none">
+    <Card className="group relative flex min-h-[350px] min-w-0 flex-col overflow-hidden border-slate-200/90 bg-linear-to-b from-white to-slate-50/90 shadow-[0_14px_32px_-20px_rgba(15,23,42,0.42)] transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_20px_38px_-20px_rgba(15,23,42,0.5)] sm:min-h-[330px] lg:min-h-[310px] xl:min-h-[280px] motion-reduce:transform-none motion-reduce:transition-none">
       <div className="absolute inset-x-0 top-0 h-[3px] bg-[#0b1220]" aria-hidden="true" />
 
       <div className="pt-0.5">
@@ -126,7 +126,7 @@ export default function KpiCard({ metric }) {
       <svg
         ref={svgRef}
         viewBox="0 0 180 146"
-        className={`mx-auto -my-1 block w-[122%] max-w-[248px] -translate-x-[9%] select-none outline-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`mx-auto -my-1 block w-full max-w-[310px] select-none outline-none sm:max-w-[285px] lg:max-w-[270px] xl:w-[122%] xl:max-w-[248px] xl:-translate-x-[9%] ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{ touchAction: 'pan-y' }}
         role="slider"
         tabIndex="0"
@@ -196,8 +196,8 @@ export default function KpiCard({ metric }) {
         </text>
       </svg>
 
-      <div className="mt-auto h-[58px] shrink-0 border-t border-slate-200/80 pt-2.5">
-        <p className="text-[13px] font-medium leading-[1.35rem] text-slate-600">{cleanText(description)}</p>
+      <div className="mt-auto h-[66px] shrink-0 border-t border-slate-200/80 pt-2.5 xl:h-[58px]">
+        <p className="text-[15px] font-medium leading-6 text-slate-600 xl:text-[13px] xl:leading-[1.35rem]">{cleanText(description)}</p>
       </div>
     </Card>
   )

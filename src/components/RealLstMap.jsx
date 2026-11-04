@@ -73,6 +73,7 @@ export default function RealLstMap({ mode = 'lst' }) {
     })
     mapRef.current = map
     map.fitBounds(BANGLADESH_BOUNDS, { padding: [8, 8], animate: false })
+    const mobilePanThreshold = map.getZoom() + 0.2
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -164,6 +165,16 @@ export default function RealLstMap({ mode = 'lst' }) {
 
     const updateMarkerVisibility = () => {
       const currentZoom = map.getZoom()
+      if (coarsePointer) {
+        const enableTouchNavigation = currentZoom > mobilePanThreshold
+        if (enableTouchNavigation) {
+          map.dragging.enable()
+          map.touchZoom.enable()
+        } else {
+          map.dragging.disable()
+          map.touchZoom.disable()
+        }
+      }
       const showMarkers = currentZoom >= 8.5
       const showLabels = currentZoom >= 10.25
       markersRef.current.forEach((marker) => {

@@ -6,6 +6,8 @@ import LstTrendPreview from '../components/LstTrendPreview'
 import HeatRiskDistribution from '../components/HeatRiskDistribution'
 import SeasonalComparison from '../components/SeasonalComparison'
 import EnvironmentalFactors from '../components/EnvironmentalFactors'
+import HotspotEvolution from '../components/HotspotEvolution'
+import Recommendations from '../components/Recommendations'
 import { WIDGETS, KPIS } from '../config'
 
 const Placeholder = ({ h = 'h-48' }) => (
@@ -42,7 +44,9 @@ export default function Home() {
             {w.id === 'hotspot-distribution' && <HeatRiskDistribution />}
             {w.id === 'seasonal' && <SeasonalComparison />}
             {w.id === 'env-factors' && <EnvironmentalFactors />}
-            {!['lst-map', 'uhi-map', 'lst-trend', 'hotspot-distribution', 'seasonal', 'env-factors'].includes(w.id) && <Placeholder />}
+            {w.id === 'hotspot-evolution' && <HotspotEvolution />}
+            {w.id === 'recommendations' && <Recommendations />}
+            {!['lst-map', 'uhi-map', 'lst-trend', 'hotspot-distribution', 'seasonal', 'env-factors', 'hotspot-evolution', 'recommendations'].includes(w.id) && <Placeholder />}
           </Card>
         ))}
       </div>

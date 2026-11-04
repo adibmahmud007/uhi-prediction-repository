@@ -8,8 +8,8 @@ export const WIDGETS = [
   { id: 'hotspot-distribution', title: 'Heat-Risk Distribution', icon: BarChart3, span: 'lg:col-span-4', desc: '...' },
   { id: 'seasonal', title: 'Seasonal Comparison', icon: CalendarDays, span: 'lg:col-span-4', desc: '...' },
   { id: 'env-factors', title: 'Environmental Factors', icon: Leaf, span: 'lg:col-span-4', desc: '...' },
-  { id: 'hotspot-evolution', title: 'Hotspot Evolution', icon: GitBranch, span: 'lg:col-span-6', desc: '...' },
-  { id: 'recommendations', title: 'Recommendations', icon: Lightbulb, span: 'lg:col-span-6', desc: '...' },
+  { id: 'hotspot-evolution', title: 'Hotspot Evolution', icon: GitBranch, span: 'lg:col-span-12', desc: '...' },
+  { id: 'recommendations', title: 'Recommendations', icon: Lightbulb, span: 'lg:col-span-12', desc: '...' },
 ]
 
 // Illustrative static values for the summary cards; these do not use the filters.

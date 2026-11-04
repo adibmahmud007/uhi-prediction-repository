@@ -123,10 +123,11 @@ export default function KpiCard({ metric }) {
         <h3 className="text-[14px] font-bold leading-5 tracking-[-0.01em] text-slate-900">{label}</h3>
       </div>
 
-      <svg
+      <div className="flex w-full justify-center xl:-mx-4 xl:w-[calc(100%+2rem)]">
+        <svg
         ref={svgRef}
         viewBox="0 0 180 146"
-        className={`mx-auto -my-1 block w-full max-w-[310px] select-none outline-none sm:max-w-[285px] lg:max-w-[270px] xl:w-[122%] xl:max-w-[248px] xl:-translate-x-[9%] ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`-my-1 block w-full max-w-[310px] shrink-0 select-none outline-none sm:max-w-[285px] lg:max-w-[270px] xl:w-[248px] xl:max-w-full ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{ touchAction: 'pan-y' }}
         role="slider"
         tabIndex="0"
@@ -194,7 +195,8 @@ export default function KpiCard({ metric }) {
         <text x={CENTER.x} y="126" textAnchor="middle" fill={currentColor} fontSize="8" fontWeight="700">
           {cleanText(unit)}
         </text>
-      </svg>
+        </svg>
+      </div>
 
       <div className="mt-auto h-[66px] shrink-0 border-t border-slate-200/80 pt-2.5 xl:h-[58px]">
         <p className="text-[15px] font-medium leading-6 text-slate-600 xl:text-[13px] xl:leading-[1.35rem]">{cleanText(description)}</p>

@@ -14,12 +14,12 @@ export const WIDGETS = [
 
 // Illustrative static values for the summary cards; these do not use the filters.
 export const KPIS = [
-  { id: 'predicted-lst', label: 'Predicted LST', value: '36.8', unit: '°C', description: 'Land surface temperature', icon: Thermometer, color: 'copper' },
-  { id: 'uhi-intensity', label: 'UHI Intensity', value: '+4.2', unit: '°C', description: 'Urban–rural temperature gap', icon: Flame, color: 'copper' },
-  { id: 'hotspot-area', label: 'Hotspot Area', value: '128.4', unit: 'km²', description: 'Area affected by heat hotspots', icon: MapPin, color: 'slate' },
-  { id: 'high-risk-population', label: 'High-risk Population', value: '1.24', unit: 'M', description: 'People exposed to high heat', icon: Users, color: 'slate' },
-  { id: 'vegetation-cover', label: 'Vegetation Cover', value: '18.6', unit: '%', description: 'Share of land with vegetation', icon: Leaf, color: 'teal' },
-  { id: 'water-bodies', label: 'Water Bodies', value: '6.3', unit: '%', description: 'Share of land covered by water', icon: Droplets, color: 'blue' },
+  { id: 'predicted-lst', label: 'Predicted LST', value: '36.8', unit: '°C', description: 'Predicted Land Surface Temperature', icon: Thermometer, color: 'copper' },
+  { id: 'uhi-intensity', label: 'UHI Intensity', value: '+4.2', unit: '°C', description: 'Urban–Rural Temperature Gap', icon: Flame, color: 'copper' },
+  { id: 'hotspot-area', label: 'Hotspot Area', value: '128.4', unit: 'km²', description: 'Area Affected by Heat Hotspots', icon: MapPin, color: 'slate' },
+  { id: 'high-risk-population', label: 'High-risk Population', value: '1.24', unit: 'M', description: 'People Exposed to High Heat', icon: Users, color: 'slate' },
+  { id: 'vegetation-cover', label: 'Vegetation Cover', value: '18.6', unit: '%', description: 'Share of Land with Vegetation', icon: Leaf, color: 'teal' },
+  { id: 'water-bodies', label: 'Water Bodies', value: '6.3', unit: '%', description: 'Share of Land Covered by Water', icon: Droplets, color: 'blue' },
 ]
 export const CITIES = [
   { id: 'dhaka', name: 'Dhaka', center: [23.8103, 90.4125], zoom: 12 },

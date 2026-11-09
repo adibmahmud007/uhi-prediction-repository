@@ -17,6 +17,15 @@ const DHAKA_POINTS = [
   ['Sabujbagh', 90.4292, 23.7312, 39.5, 31.7, 5.0], ['Demra', 90.4827, 23.7216, 40.0, 31.9, 5.1],
   ['Shyampur', 90.4302, 23.685, 41.0, 32.2, 5.5], ['Keraniganj', 90.3535, 23.698, 37.1, 30.7, 3.8],
   ['Nawabganj', 90.1636, 23.6582, 32.8, 28.9, 1.9], ['Dohar', 90.1424, 23.5883, 31.9, 28.4, 1.6],
+  ['Ashulia', 90.3289577, 23.8969898, 35.8, 30.2, 2.9], ['Hemayetpur', 90.2708736, 23.7935258, 36.5, 30.7, 3.3],
+  ['Jahangirnagar University', 90.264258, 23.8824055, 34.2, 29.4, 1.9], ['Kalampur', 90.154259, 23.918176, 34.0, 29.2, 1.8],
+  ['Kushura', 90.1252229, 23.9702646, 33.4, 28.9, 1.5], ['Joypara', 90.1203861, 23.6181725, 33.7, 29.1, 1.8],
+  ['Bandura', 90.1105974, 23.6596373, 34.1, 29.3, 2.0], ['Kalakopa', 90.1437453, 23.6607983, 34.5, 29.6, 2.2],
+  ['Agla', 90.230112, 23.6490058, 33.9, 29.2, 1.9], ['Narisha', 90.1510744, 23.5576483, 33.1, 28.8, 1.5],
+  ['Kailail', 90.2491664, 23.6868965, 34.0, 29.2, 1.8], ['Sholla', 90.1706388, 23.7097034, 33.7, 29.1, 1.7],
+  ['Bhakurta', 90.2827261, 23.769577, 35.6, 30.0, 2.7], ['Dhoiar', 90.0419089, 23.6503517, 32.9, 28.7, 1.4],
+  ['Nannar', 90.1759077, 23.8833918, 34.4, 29.5, 2.1], ['Rowail', 90.1794889, 23.8454314, 34.2, 29.3, 1.9],
+  ['Baisakanda', 90.1534396, 23.999909, 33.6, 29.0, 1.6], ['Zirabo', 90.3212269, 23.9132163, 35.3, 29.8, 2.5],
 ]
 
 const MODE = {
@@ -42,7 +51,7 @@ function popupMarkup(point, color) {
     </div>`
 }
 
-export default function RealLstMap({ mode = 'lst' }) {
+export default function RealLstMap({ mode = 'lst', expanded = false }) {
   const { filters } = useFilters()
   const visual = MODE[mode] || MODE.lst
   const containerRef = useRef(null)
@@ -85,6 +94,7 @@ export default function RealLstMap({ mode = 'lst' }) {
     map.getPane('heatZones').style.zIndex = '340'
     map.getPane('heatZones').style.pointerEvents = 'none'
     const heatRenderer = L.svg({ pane: 'heatZones', padding: 0.5 })
+    let districtLayer = null
 
     const heatColor = (point) => {
       const value = mode === 'uhi' ? point[5] : point[3]
@@ -139,13 +149,29 @@ export default function RealLstMap({ mode = 'lst' }) {
     })
 
     let active = true
-    fetch('/bangladesh-districts.geojson')
-      .then((response) => {
+    Promise.all([
+      fetch('/bangladesh-districts.geojson').then((response) => {
         if (!response.ok) throw new Error('District data unavailable')
         return response.json()
-      })
-      .then((data) => {
+      }),
+      fetch('/dhaka-district-full.geojson')
+        .then((response) => {
+          if (!response.ok) throw new Error('Full-resolution Dhaka boundary unavailable')
+          return response.json()
+        })
+        .catch(() => null),
+    ])
+      .then(([countryData, fullDhakaData]) => {
         if (!active || !mapRef.current) return
+        const fullDhakaFeature = fullDhakaData?.features?.find((feature) => feature.properties?.shapeName === 'Dhaka')
+        const data = fullDhakaFeature
+          ? {
+              ...countryData,
+              features: countryData.features.map((feature) => (
+                feature.properties?.shapeName === 'Dhaka' ? fullDhakaFeature : feature
+              )),
+            }
+          : countryData
         const boundaryColor = mode === 'uhi' ? '#e879f9' : '#fb923c'
         L.geoJSON(data, {
           style: (feature) => feature.properties?.shapeName === 'Dhaka'
@@ -153,10 +179,15 @@ export default function RealLstMap({ mode = 'lst' }) {
             : { opacity: 0, fillOpacity: 0 },
           interactive: false,
         }).addTo(map)
-        const districtLayer = L.geoJSON(data, {
+        const closeBoundaryView = map.getZoom() >= 8.5
+        districtLayer = L.geoJSON(data, {
           style: (feature) => feature.properties?.shapeName === 'Dhaka'
-            ? { color: boundaryColor, weight: 2.5, fillColor: visual.district, fillOpacity: 0.1, opacity: 1, lineCap: 'round', lineJoin: 'round' }
-            : { color: '#4f6f91', weight: 0.5, fillColor: '#0f2747', fillOpacity: 0.02, opacity: 0.3 },
+            ? { color: closeBoundaryView ? '#020617' : boundaryColor, weight: closeBoundaryView ? 3.5 : 2.5, fillColor: visual.district, fillOpacity: 0.1, opacity: 1, lineCap: 'round', lineJoin: 'round' }
+            : expanded
+              ? closeBoundaryView
+                ? { weight: 0, fillOpacity: 0, opacity: 0 }
+                : { color: '#38bdf8', weight: 1, fillColor: '#2563eb', fillOpacity: 0.075, opacity: 0.62, lineCap: 'round', lineJoin: 'round' }
+              : { color: '#4f6f91', weight: 0.5, fillColor: '#0f2747', fillOpacity: 0.02, opacity: 0.3 },
           interactive: false,
         }).addTo(map)
         boundsRef.current.country = districtLayer.getBounds().pad(0.03)
@@ -174,6 +205,17 @@ export default function RealLstMap({ mode = 'lst' }) {
           map.dragging.disable()
           map.touchZoom.disable()
         }
+      }
+      if (districtLayer) {
+        const closeBoundaryView = currentZoom >= 8.5
+        const boundaryColor = mode === 'uhi' ? '#e879f9' : '#fb923c'
+        districtLayer.setStyle((feature) => feature.properties?.shapeName === 'Dhaka'
+          ? { color: closeBoundaryView ? '#020617' : boundaryColor, weight: closeBoundaryView ? 3.5 : 2.5, fillColor: visual.district, fillOpacity: 0.1, opacity: 1, lineCap: 'round', lineJoin: 'round' }
+          : expanded
+            ? closeBoundaryView
+              ? { weight: 0, fillOpacity: 0, opacity: 0 }
+              : { color: '#38bdf8', weight: 1, fillColor: '#2563eb', fillOpacity: 0.075, opacity: 0.62, lineCap: 'round', lineJoin: 'round' }
+            : { color: '#4f6f91', weight: 0.5, fillColor: '#0f2747', fillOpacity: 0.02, opacity: 0.3 })
       }
       const showMarkers = currentZoom >= 8.5
       const showLabels = currentZoom >= 10.25
@@ -213,7 +255,7 @@ export default function RealLstMap({ mode = 'lst' }) {
       map.remove()
       mapRef.current = null
     }
-  }, [mode, visual.colors, visual.district])
+  }, [expanded, mode, visual.colors, visual.district])
 
   const zoomIn = () => mapRef.current?.zoomIn(0.5, { animate: true })
   const zoomOut = () => mapRef.current?.zoomOut(0.5, { animate: true })
@@ -238,7 +280,7 @@ export default function RealLstMap({ mode = 'lst' }) {
         <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-indigo-700 ring-1 ring-inset ring-indigo-100"><MousePointerClick size={12} aria-hidden="true" /> {visual.badge}</span>
       </div>
 
-      <div className="relative isolate h-96 overflow-hidden rounded-2xl border border-slate-700 bg-[#07152d] shadow-inner">
+      <div className={`relative isolate overflow-hidden rounded-2xl border border-slate-700 bg-[#07152d] shadow-inner ${expanded ? 'h-[500px] sm:h-[560px] lg:h-[620px]' : 'h-96'}`}>
         <div ref={containerRef} className="lst-map real-lst-map h-full w-full" aria-label={`Real street map showing ${mode === 'uhi' ? 'UHI' : 'LST'} monitoring points in Dhaka`} />
         {!ready && <div role="status" className="pointer-events-none absolute inset-0 z-[600] grid place-items-center bg-[#07152d] text-xs font-semibold text-blue-100">Loading real map…</div>}
 

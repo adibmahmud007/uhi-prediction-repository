@@ -2,8 +2,8 @@
 import { Thermometer, Flame, BarChart3, TrendingUp, CalendarDays, Leaf, GitBranch, Lightbulb, MapPin, Users, Droplets } from 'lucide-react'
 
 export const WIDGETS = [
-  { id: 'lst-map', title: 'Predicted LST Map', icon: Thermometer, span: 'lg:col-span-4', desc: '...' },
-  { id: 'uhi-map', title: 'UHI intensity Map', icon: Flame, span: 'lg:col-span-4', desc: '...' },
+  { id: 'lst-map', title: 'Predicted LST Map', icon: Thermometer, span: 'lg:col-span-4', desc: 'Explore predicted land surface temperature patterns, thermal hotspots and location-level monitoring insights across the study area.' },
+  { id: 'uhi-map', title: 'UHI Intensity Map', icon: Flame, span: 'lg:col-span-4', desc: 'Inspect urban heat island intensity, high-risk zones and the temperature contrast between dense urban areas and their surroundings.' },
   { id: 'lst-trend', title: 'LST trend', icon: TrendingUp, span: 'lg:col-span-4', desc: '...' },
   { id: 'hotspot-distribution', title: 'Heat-Risk Distribution', icon: BarChart3, span: 'lg:col-span-4', desc: '...' },
   { id: 'seasonal', title: 'Seasonal Comparison', icon: CalendarDays, span: 'lg:col-span-4', desc: '...' },

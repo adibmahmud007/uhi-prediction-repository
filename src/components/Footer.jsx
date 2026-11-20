@@ -1,4 +1,5 @@
-import { ExternalLink, Globe2, Mail, MapPin, Orbit, Satellite, Waves } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Check, Copy, ExternalLink, Globe2, Mail, MapPin, Orbit, Satellite, Waves } from 'lucide-react'
 
 const contactItems = [
   {
@@ -22,13 +23,25 @@ const contactItems = [
 ]
 
 export default function Footer() {
+  const [emailCopied, setEmailCopied] = useState(false)
+  const copyFeedbackTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(copyFeedbackTimer.current), [])
+
+  const copyEmail = async () => {
+    await navigator.clipboard.writeText('admin@sparrso.gov.bd')
+    setEmailCopied(true)
+    clearTimeout(copyFeedbackTimer.current)
+    copyFeedbackTimer.current = setTimeout(() => setEmailCopied(false), 1800)
+  }
+
   return (
     <footer className="relative mt-8 overflow-hidden border-t border-blue-800/40 bg-[#0b1220] font-sans text-slate-300">
       <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-cyan-400/80 to-transparent" aria-hidden="true" />
       <div className="pointer-events-none absolute -left-24 top-4 h-64 w-64 rounded-full bg-blue-600/10 blur-3xl" aria-hidden="true" />
       <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-cyan-500/[0.07] blur-3xl" aria-hidden="true" />
 
-      <div className="relative mx-auto max-w-7xl px-4 pb-5 pt-9 sm:pt-10">
+      <div className="relative mx-auto w-full max-w-7xl px-4 pb-5 pt-9 sm:pt-10 min-[1600px]:max-w-none min-[1600px]:px-8">
         <div className="grid gap-9 border-b border-white/10 pb-8 md:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_1fr] lg:gap-12">
           <div>
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -65,18 +78,35 @@ export default function Footer() {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-300">Connect with SPARRSO</p>
             <div className="mt-3 space-y-2.5">
-              {contactItems.map(({ label, value, href, icon: Icon }) => (
-                <a key={label} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noreferrer' : undefined} className="group flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2.5 transition-[border-color,background-color,transform] duration-200 hover:translate-x-0.5 hover:border-cyan-300/25 hover:bg-white/[0.065] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 motion-reduce:transform-none motion-reduce:transition-none">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-cyan-300 ring-1 ring-inset ring-blue-300/10">
-                    <Icon size={16} strokeWidth={1.8} aria-hidden="true" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</span>
-                    <span className="mt-0.5 block truncate text-[12px] font-medium text-slate-200">{value}</span>
-                  </span>
-                  {href.startsWith('http') && <ExternalLink size={13} className="shrink-0 text-slate-500 transition-colors group-hover:text-cyan-300" aria-hidden="true" />}
-                </a>
-              ))}
+              {contactItems.map(({ label, value, href, icon: Icon }) => {
+                const isEmail = href.startsWith('mailto:')
+
+                return (
+                  <div key={label} className="group flex items-center rounded-xl border border-white/[0.08] bg-white/[0.035] transition-[border-color,background-color,transform] duration-200 hover:translate-x-0.5 hover:border-cyan-300/25 hover:bg-white/[0.065] motion-reduce:transform-none motion-reduce:transition-none">
+                    <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noreferrer' : undefined} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300">
+                      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-cyan-300 ring-1 ring-inset ring-blue-300/10">
+                        <Icon size={16} strokeWidth={1.8} aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</span>
+                        <span className="mt-0.5 block truncate text-[12px] font-medium text-slate-200">{value}</span>
+                      </span>
+                      {href.startsWith('http') && <ExternalLink size={13} className="shrink-0 text-slate-500 transition-colors group-hover:text-cyan-300" aria-hidden="true" />}
+                    </a>
+                    {isEmail && (
+                      <button
+                        type="button"
+                        onClick={copyEmail}
+                        className="mr-2 inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.055] px-2 text-[10px] font-semibold text-slate-300 transition-colors hover:border-cyan-300/30 hover:bg-cyan-400/10 hover:text-cyan-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+                        aria-label="Copy official email address"
+                      >
+                        {emailCopied ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
+                        <span>{emailCopied ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>

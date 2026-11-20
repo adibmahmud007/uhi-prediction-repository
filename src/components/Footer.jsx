@@ -41,7 +41,7 @@ export default function Footer() {
       <div className="pointer-events-none absolute -left-24 top-4 h-64 w-64 rounded-full bg-blue-600/10 blur-3xl" aria-hidden="true" />
       <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-cyan-500/[0.07] blur-3xl" aria-hidden="true" />
 
-      <div className="relative mx-auto w-full max-w-7xl px-4 pb-5 pt-9 sm:pt-10 min-[1600px]:max-w-none min-[1600px]:px-8">
+      <div className="relative mx-auto w-full max-w-7xl px-4 pb-5 pt-9 sm:pt-10 min-[1600px]:w-[88%] min-[1600px]:max-w-none min-[1600px]:px-6">
         <div className="grid gap-9 border-b border-white/10 pb-8 md:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_1fr] lg:gap-12">
           <div>
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">

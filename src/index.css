@@ -8,6 +8,60 @@
 
 body { @apply bg-page text-slate-900 antialiased; }
 
+.prediction-loading-panel {
+  background:
+    radial-gradient(ellipse at 50% 37%, rgb(35 93 157 / 32%), transparent 57%),
+    radial-gradient(circle at 17% 28%, rgb(147 197 253 / 52%) 1px, transparent 2px),
+    radial-gradient(circle at 82% 22%, rgb(186 230 253 / 64%) 1px, transparent 2px),
+    radial-gradient(circle at 74% 55%, rgb(147 197 253 / 45%) 1px, transparent 2px),
+    radial-gradient(circle at 24% 49%, rgb(186 230 253 / 45%) 1px, transparent 2px),
+    linear-gradient(155deg, #0b182c, #060f20);
+}
+
+.prediction-earth-stage {
+  height: clamp(27rem, 45vw, 37rem);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .prediction-earth-location {
+    animation: prediction-location-label var(--prediction-duration) linear both;
+  }
+
+  .prediction-loading-progress {
+    transform-origin: left;
+    animation: prediction-progress var(--prediction-duration) linear both;
+  }
+
+  .prediction-results-reveal {
+    & .prediction-results-heading,
+    & .prediction-kpi-grid > *,
+    & .prediction-widget-grid > * {
+      animation: prediction-wipe 450ms cubic-bezier(.2, .65, .3, 1) backwards;
+    }
+
+    & .prediction-kpi-grid > * { animation-delay: 75ms; }
+    & .prediction-widget-grid > * { animation-delay: 180ms; }
+    & .prediction-widget-grid > :nth-child(n + 4) { animation-delay: 310ms; }
+    & .prediction-widget-grid > :nth-child(7) { animation-delay: 440ms; }
+    & .prediction-widget-grid > :nth-child(8) { animation-delay: 570ms; }
+  }
+
+  @keyframes prediction-location-label {
+    0%, 76% { opacity: 0; translate: 0 5px; }
+    89%, 100% { opacity: 1; translate: 0; }
+  }
+
+  @keyframes prediction-progress {
+    from { scale: 0 1; }
+    to { scale: 1 1; }
+  }
+
+  @keyframes prediction-wipe {
+    from { clip-path: inset(-28px -28px 100%); opacity: 0; translate: 0 -6px; }
+    to { clip-path: inset(-28px); opacity: 1; translate: 0; }
+  }
+}
+
 .sidebar-scroll { scrollbar-width: none; }
 .sidebar-scroll::-webkit-scrollbar { display: none; }
 

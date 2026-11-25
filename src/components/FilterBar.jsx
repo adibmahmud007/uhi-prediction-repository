@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronDown, Clock3, Layers3, MapPin, Play } from 'lucide-react'
+import { CalendarDays, ChevronDown, Clock3, Layers3, LoaderCircle, MapPin, Play } from 'lucide-react'
 import { useFilters } from '../context'
 import { CITIES, SCALES, SCENARIOS } from '../config'
 
@@ -21,25 +21,38 @@ function Select({ label, value, onChange, options, icon: Icon }) {
   )
 }
 
-export default function FilterBar() {
+export default function FilterBar({ isPredicting, onRunPrediction }) {
   const { filters: f, set } = useFilters()
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    onRunPrediction()
+  }
+
   return (
-    <fieldset className="grid min-w-0 grid-cols-1 items-end gap-4 min-[420px]:grid-cols-2 lg:grid-cols-[1fr_1.2fr_1fr_1fr_auto]">
-      <legend className="sr-only">Prediction filters</legend>
-      <Select label="Location" value={f.city} onChange={(v) => set('city', v)} options={CITIES} icon={MapPin} />
-      <label className={labelStyle}>
-        Prediction date
-        <span className="relative block">
-          <CalendarDays size={17} strokeWidth={1.8} className={iconStyle} aria-hidden="true" />
-          <input type="date" className={`${field} pr-3 [color-scheme:light]`} value={f.date} min="2026-01-01" max="2050-12-31" onChange={(e) => set('date', e.target.value)} />
-        </span>
-      </label>
-      <Select label="Temporal scale" value={f.scale} onChange={(v) => set('scale', v)} options={SCALES} icon={Clock3} />
-      <Select label="Scenario" value={f.scenario} onChange={(v) => set('scenario', v)} options={SCENARIOS} icon={Layers3} />
-      <button type="button" className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-linear-to-r from-blue-700 via-indigo-700 to-indigo-800 px-6 text-sm font-semibold text-white shadow-md shadow-black/20 transition-[filter,box-shadow] duration-200 hover:brightness-110 hover:shadow-lg hover:shadow-indigo-950/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-200 active:brightness-95 min-[420px]:col-span-2 lg:col-span-1 motion-reduce:transition-none">
-        <Play size={15} strokeWidth={2} aria-hidden="true" />
-        Run prediction
-      </button>
-    </fieldset>
+    <form onSubmit={handleSubmit}>
+      <fieldset disabled={isPredicting} className="grid min-w-0 grid-cols-1 items-end gap-4 min-[420px]:grid-cols-2 lg:grid-cols-[1fr_1.2fr_1fr_1fr_auto]">
+        <legend className="sr-only">Prediction filters</legend>
+        <Select label="Location" value={f.city} onChange={(v) => set('city', v)} options={CITIES} icon={MapPin} />
+        <label className={labelStyle}>
+          Prediction date
+          <span className="relative block">
+            <CalendarDays size={17} strokeWidth={1.8} className={iconStyle} aria-hidden="true" />
+            <input type="date" className={`${field} pr-3 [color-scheme:light]`} value={f.date} min="2026-01-01" max="2050-12-31" required onChange={(e) => set('date', e.target.value)} />
+          </span>
+        </label>
+        <Select label="Temporal scale" value={f.scale} onChange={(v) => set('scale', v)} options={SCALES} icon={Clock3} />
+        <Select label="Scenario" value={f.scenario} onChange={(v) => set('scenario', v)} options={SCENARIOS} icon={Layers3} />
+        <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-blue-300/30 bg-linear-to-r from-blue-700 via-indigo-700 to-indigo-800 px-6 text-sm font-semibold text-white shadow-md shadow-black/20 transition-[filter,box-shadow] duration-200 enabled:hover:brightness-110 enabled:hover:shadow-lg enabled:hover:shadow-indigo-950/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-200 enabled:active:brightness-95 disabled:cursor-wait min-[420px]:col-span-2 lg:col-span-1 motion-reduce:transition-none">
+          {isPredicting
+            ? <LoaderCircle size={15} className="motion-safe:animate-spin" aria-hidden="true" />
+            : <Play size={15} strokeWidth={2} aria-hidden="true" />}
+          <span className="grid">
+            <span className={`col-start-1 row-start-1${isPredicting ? ' invisible' : ''}`}>Run prediction</span>
+            {isPredicting && <span className="col-start-1 row-start-1">Predicting…</span>}
+          </span>
+        </button>
+      </fieldset>
+    </form>
   )
 }

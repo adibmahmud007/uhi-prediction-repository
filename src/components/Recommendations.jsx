@@ -75,7 +75,7 @@ export default function Recommendations() {
               <span className="text-[10px] font-bold tabular-nums text-slate-500">0{index + 1}</span>
             </div>
 
-            <h3 className="relative mt-4 text-[15px] font-semibold text-white">{title}</h3>
+            <h3 className="relative mt-4 text-base/5 font-bold tracking-tight text-white">{title}</h3>
             <p className="relative mt-2 text-[11px] leading-5 text-slate-300">{detail}</p>
 
             <div className="relative mt-auto grid grid-cols-2 gap-2 pt-4">

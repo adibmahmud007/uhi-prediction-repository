@@ -183,11 +183,9 @@ export default function RealLstMap({ mode = 'lst', expanded = false }) {
         districtLayer = L.geoJSON(data, {
           style: (feature) => feature.properties?.shapeName === 'Dhaka'
             ? { color: closeBoundaryView ? '#020617' : boundaryColor, weight: closeBoundaryView ? 3.5 : 2.5, fillColor: visual.district, fillOpacity: 0.1, opacity: 1, lineCap: 'round', lineJoin: 'round' }
-            : expanded
-              ? closeBoundaryView
-                ? { weight: 0, fillOpacity: 0, opacity: 0 }
-                : { color: '#38bdf8', weight: 1, fillColor: '#2563eb', fillOpacity: 0.075, opacity: 0.62, lineCap: 'round', lineJoin: 'round' }
-              : { color: '#4f6f91', weight: 0.5, fillColor: '#0f2747', fillOpacity: 0.02, opacity: 0.3 },
+            : closeBoundaryView
+              ? { weight: 0, fillOpacity: 0, opacity: 0 }
+              : { color: '#38bdf8', weight: 1, fillColor: '#2563eb', fillOpacity: 0.075, opacity: 0.62, lineCap: 'round', lineJoin: 'round' },
           interactive: false,
         }).addTo(map)
         boundsRef.current.country = districtLayer.getBounds().pad(0.03)
@@ -211,11 +209,9 @@ export default function RealLstMap({ mode = 'lst', expanded = false }) {
         const boundaryColor = mode === 'uhi' ? '#e879f9' : '#fb923c'
         districtLayer.setStyle((feature) => feature.properties?.shapeName === 'Dhaka'
           ? { color: closeBoundaryView ? '#020617' : boundaryColor, weight: closeBoundaryView ? 3.5 : 2.5, fillColor: visual.district, fillOpacity: 0.1, opacity: 1, lineCap: 'round', lineJoin: 'round' }
-          : expanded
-            ? closeBoundaryView
-              ? { weight: 0, fillOpacity: 0, opacity: 0 }
-              : { color: '#38bdf8', weight: 1, fillColor: '#2563eb', fillOpacity: 0.075, opacity: 0.62, lineCap: 'round', lineJoin: 'round' }
-            : { color: '#4f6f91', weight: 0.5, fillColor: '#0f2747', fillOpacity: 0.02, opacity: 0.3 })
+          : closeBoundaryView
+            ? { weight: 0, fillOpacity: 0, opacity: 0 }
+            : { color: '#38bdf8', weight: 1, fillColor: '#2563eb', fillOpacity: 0.075, opacity: 0.62, lineCap: 'round', lineJoin: 'round' })
       }
       const showMarkers = currentZoom >= 8.5
       const showLabels = currentZoom >= 10.25

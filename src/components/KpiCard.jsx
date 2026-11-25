@@ -8,7 +8,7 @@ const RADIUS = 61
 
 const gaugeSettings = {
   'predicted-lst': { min: 20, max: 50, step: 0.1, colors: ['#16a34a', '#facc15', '#dc2626'] },
-  'uhi-intensity': { min: 0, max: 8, step: 0.1, colors: ['#16a34a', '#facc15', '#dc2626'] },
+  'uhi-intensity': { min: 0, max: 8, step: 0.1, colors: ['#2563eb', '#8b5cf6', '#facc15', '#f97316', '#be123c'] },
   'hotspot-area': { min: 0, max: 200, step: 0.1, colors: ['#fecaca', '#f87171', '#b91c1c'] },
   'high-risk-population': { min: 0, max: 2, step: 0.01, colors: ['#e2e8f0', '#94a3b8', '#111827'] },
   'vegetation-cover': { min: 0, max: 50, step: 0.1, colors: ['#bbf7d0', '#4ade80', '#047857'] },
@@ -120,7 +120,7 @@ export default function KpiCard({ metric }) {
       <div className="absolute inset-x-0 top-0 h-[3px] bg-[#0b1220]" aria-hidden="true" />
 
       <div className="pt-0.5">
-        <h3 className="text-[14px] font-bold leading-5 tracking-[-0.01em] text-slate-900">{label}</h3>
+        <h3 className="text-base/5 font-bold tracking-tight text-slate-950">{label}</h3>
       </div>
 
       <div className="flex w-full justify-center xl:-mx-4 xl:w-[calc(100%+2rem)]">

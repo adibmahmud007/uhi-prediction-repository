@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import FilterBar from './components/FilterBar'
+import PredictionLoading from './components/PredictionLoading'
 import StartupLogoModal from './components/StartupLogoModal'
 import Footer from './components/Footer'
 import ScrollToTopButton from './components/ScrollToTopButton'
 import Home from './pages/Home'
 import Detail from './pages/Detail'
+import LandingPage from './pages/LandingPage'
 
 const DEMO_PREDICTION_MS = 5800
 const RESULT_REVEAL_MS = 1100
@@ -16,8 +18,14 @@ export default function App() {
   const [predictionPhase, setPredictionPhase] = useState('idle')
   const location = useLocation()
   const navigate = useNavigate()
+  const isLanding = location.pathname === '/'
+  const [waitForStartupLogo] = useState(() => !isLanding)
   const isPredicting = predictionPhase === 'predicting'
   const isRevealing = predictionPhase === 'revealing'
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname, isPredicting])
 
   useEffect(() => {
     if (predictionPhase === 'idle') return undefined
@@ -32,12 +40,30 @@ export default function App() {
   const runPrediction = () => {
     if (isPredicting) return
     setPredictionPhase('predicting')
-    if (location.pathname !== '/') navigate('/')
+    if (location.pathname !== '/dashboard') navigate('/dashboard')
+  }
+
+  if (isLanding) return <LandingPage />
+
+  const predictionStatus = (
+    <div role="status" className="sr-only">
+      {isPredicting ? 'Running demo LST and UHI prediction.' : isRevealing ? 'Demo prediction results are ready.' : ''}
+    </div>
+  )
+
+  if (isPredicting) {
+    return (
+      <>
+        {predictionStatus}
+        <PredictionLoading duration={DEMO_PREDICTION_MS} />
+      </>
+    )
   }
 
   return (
     <>
-      <StartupLogoModal />
+      {predictionStatus}
+      {waitForStartupLogo && !window.__startupLogoClosed && <StartupLogoModal />}
       <Sidebar open={open} onClose={() => setOpen(false)} />
       <ScrollToTopButton />
       <div className="flex min-h-screen flex-col">
@@ -58,16 +84,13 @@ export default function App() {
               </div>
             </div>
             <div className="border-t border-white/10 pt-4">
-              <FilterBar isPredicting={isPredicting} onRunPrediction={runPrediction} />
+              <FilterBar onRunPrediction={runPrediction} />
             </div>
           </div>
         </header>
-        <div role="status" className="sr-only">
-          {isPredicting ? 'Running demo LST and UHI prediction.' : isRevealing ? 'Demo prediction results are ready.' : ''}
-        </div>
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-4 min-[1600px]:w-[88%] min-[1600px]:max-w-none min-[1600px]:px-6">
           <Routes>
-            <Route path="/" element={<Home isPredicting={isPredicting} isRevealing={isRevealing} predictionDuration={DEMO_PREDICTION_MS} />} />
+            <Route path="/dashboard" element={<Home isRevealing={isRevealing} waitForStartupLogo={waitForStartupLogo} />} />
             <Route path="/:id" element={<Detail />} />
           </Routes>
         </main>

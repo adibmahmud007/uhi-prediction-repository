@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-import { X, LayoutDashboard, ChevronRight } from 'lucide-react'
+import { X, LayoutDashboard, ChevronRight, House } from 'lucide-react'
 import { WIDGETS } from '../config'
 
 const link = ({ isActive }) =>
@@ -65,7 +65,8 @@ export default function Sidebar({ open, onClose }) {
         <nav aria-label="Main navigation" className="sidebar-scroll min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-4">
           <div className="space-y-2">
             <p className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-200/80">Overview</p>
-            <SidebarLink to="/" end icon={LayoutDashboard} title="Dashboard" onClose={onClose} />
+            <SidebarLink to="/dashboard" end icon={LayoutDashboard} title="Dashboard" onClose={onClose} />
+            <SidebarLink to="/" end icon={House} title="Landing page" onClose={onClose} />
           </div>
           <div className="space-y-2 border-t border-white/10 pt-4">
             <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-200/80">Detailed analysis</p>

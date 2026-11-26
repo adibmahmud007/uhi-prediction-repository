@@ -39,13 +39,15 @@ function decimalsFor(value) {
   return decimal?.length || 0
 }
 
-export default function KpiCard({ metric }) {
+export default function KpiCard({ metric, waitForStartupLogo = true }) {
   const { label, value, unit, description } = metric
   const settings = gaugeSettings[metric.id] || gaugeSettings['water-bodies']
   const originalValue = Number.parseFloat(value)
   const decimals = decimalsFor(value)
   const targetPercent = ((originalValue - settings.min) / (settings.max - settings.min)) * 100
-  const [percent, setPercent] = useState(0)
+  const [percent, setPercent] = useState(() => (
+    waitForStartupLogo && !window.__startupLogoClosed ? 0 : Math.min(100, Math.max(0, targetPercent))
+  ))
   const [dragging, setDragging] = useState(false)
   const svgRef = useRef(null)
 
@@ -63,7 +65,7 @@ export default function KpiCard({ metric }) {
     }
 
     window.addEventListener('startup-logo-closed', runStartupSweep)
-    if (window.__startupLogoClosed) {
+    if (!waitForStartupLogo || window.__startupLogoClosed) {
       setPercent(Math.min(100, Math.max(0, targetPercent)))
     }
     return () => {
@@ -71,7 +73,7 @@ export default function KpiCard({ metric }) {
       cancelAnimationFrame(frame)
       window.clearTimeout(settleTimer)
     }
-  }, [targetPercent])
+  }, [targetPercent, waitForStartupLogo])
 
   const displayedValue = useMemo(
     () => settings.min + ((settings.max - settings.min) * percent) / 100,

@@ -13,7 +13,7 @@ export default function Detail() {
   return (
     <div className="space-y-4">
       <div className="border-b border-slate-300/70 pb-4">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 transition-colors hover:text-blue-900 hover:underline">
+        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 transition-colors hover:text-blue-900 hover:underline">
           <ArrowLeft size={14} /> Back to dashboard
         </Link>
         <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Detailed spatial analysis</p>

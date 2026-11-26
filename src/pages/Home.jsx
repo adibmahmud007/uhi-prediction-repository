@@ -8,7 +8,6 @@ import SeasonalComparison from '../components/SeasonalComparison'
 import EnvironmentalFactors from '../components/EnvironmentalFactors'
 import HotspotEvolution from '../components/HotspotEvolution'
 import Recommendations from '../components/Recommendations'
-import PredictionLoading from '../components/PredictionLoading'
 import { WIDGETS, KPIS } from '../config'
 
 const Placeholder = ({ h = 'h-48' }) => (
@@ -17,11 +16,9 @@ const Placeholder = ({ h = 'h-48' }) => (
   </div>
 )
 
-export default function Home({ isPredicting, isRevealing, predictionDuration }) {
-  if (isPredicting) return <PredictionLoading duration={predictionDuration} />
-
+export default function Home({ isRevealing, waitForStartupLogo }) {
   return (
-    <div className={`space-y-6${isRevealing ? ' prediction-results-reveal' : ''}`}>
+    <div className={`grid grid-cols-1 gap-[36px] ${isRevealing ? 'prediction-results-reveal' : ''}`}>
       <section aria-labelledby="metrics-heading" className="space-y-4">
         <div className="prediction-results-heading flex flex-wrap items-center justify-between gap-3 border-b border-slate-300/60 pb-4">
           <div className="border-l-2 border-accent pl-3">
@@ -30,7 +27,7 @@ export default function Home({ isPredicting, isRevealing, predictionDuration }) 
           </div>
         </div>
         <div className="prediction-kpi-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {KPIS.map((metric) => <KpiCard key={metric.id} metric={metric} />)}
+          {KPIS.map((metric) => <KpiCard key={metric.id} metric={metric} waitForStartupLogo={waitForStartupLogo} />)}
         </div>
       </section>
       <div className="prediction-widget-grid grid grid-cols-1 gap-3 lg:grid-cols-12">

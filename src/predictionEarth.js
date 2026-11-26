@@ -1,13 +1,35 @@
 const RAD = Math.PI / 180
 const TAU = 2 * Math.PI
 const BANGLADESH = { latitude: 23.75 * RAD, longitude: 90.35 * RAD }
-const ZOOM_OUT_END = 0.2
+const ZOOM_OUT_END = 0.22
 const ORBIT_END = 0.61
 const APPROACH_END = 0.93
+let earthImage
+
+export function loadEarthImage() {
+  earthImage ??= new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = reject
+    image.src = '/earth-blue-marble.jpg'
+  }).catch(() => {
+    earthImage = undefined
+    return null
+  })
+  return earthImage
+}
+
 const clamp = (value) => Math.min(1, Math.max(0, value))
 const ease = (value) => {
   const t = clamp(value)
-  return t * t * (3 - 2 * t)
+  const ramp = 0.24
+  const edge = Math.min(t, 1 - t)
+  const rampProgress = edge / ramp
+  const distance = edge < ramp
+    ? ramp * rampProgress ** 3 * (1 - rampProgress / 2)
+    : edge - ramp / 2
+  const eased = distance / (1 - ramp)
+  return t <= 0.5 ? eased : 1 - eased
 }
 
 export function earthCamera(progress, width, height) {
@@ -15,13 +37,14 @@ export function earthCamera(progress, width, height) {
   const pullBack = ease(progress / ZOOM_OUT_END)
   const orbit = ease((progress - ZOOM_OUT_END) / (ORBIT_END - ZOOM_OUT_END))
   const approach = ease((progress - ORBIT_END) / (APPROACH_END - ORBIT_END))
-  const fullGlobe = 0.38 * span
+  const fullGlobe = 0.36 * span
   const countryView = Math.min(width / 0.11, height / 0.15)
+  const orbitRadius = fullGlobe * (0.55 / 0.36) ** (1 - pullBack)
 
   return {
     latitude: BANGLADESH.latitude,
     longitude: BANGLADESH.longitude + TAU * orbit,
-    radius: (fullGlobe + (span * 0.64 - fullGlobe) * (1 - pullBack)) * (countryView / fullGlobe) ** approach,
+    radius: orbitRadius * (countryView / fullGlobe) ** approach,
     approach,
     boundaryOpacity: ease((approach - 0.55) / 0.45),
   }
@@ -45,14 +68,8 @@ const fragmentSource = `
 
   void main() {
     vec2 point = (gl_FragCoord.xy - u_size * 0.5) / u_radius;
-    float distance = length(point);
-    if (distance > 1.045) discard;
-
-    if (distance > 1.0) {
-      float halo = 0.25 * (1.0 - smoothstep(1.0, 1.045, distance));
-      gl_FragColor = vec4(0.22, 0.55, 0.93, halo);
-      return;
-    }
+    float distanceFromCenter = length(point);
+    if (distanceFromCenter >= 1.0) discard;
 
     float depth = sqrt(max(0.0, 1.0 - dot(point, point)));
     float lat = asin(clamp(point.y * cos(u_lat) + depth * sin(u_lat), -1.0, 1.0));
@@ -61,8 +78,8 @@ const fragmentSource = `
     vec3 surface = texture2D(u_earth, uv).rgb;
     float sun = max(0.0, dot(vec3(point, depth), vec3(-0.39, 0.43, 0.815)));
     surface *= mix(0.48 + 0.57 * sun, 1.0, u_approach);
-    surface = mix(surface, vec3(0.32, 0.60, 0.87), smoothstep(0.89, 1.0, distance) * 0.48);
-    gl_FragColor = vec4(surface, 1.0);
+    float coverage = 1.0 - smoothstep(1.0 - 1.5 / u_radius, 1.0, distanceFromCenter);
+    gl_FragColor = vec4(surface, coverage);
   }
 `
 
@@ -226,10 +243,20 @@ export function drawDistrictRings(ctx, camera, rings) {
     })
     ctx.closePath()
   }
-  ctx.fillStyle = 'rgba(41, 149, 237, 0.24)'
-  ctx.strokeStyle = 'rgba(227, 247, 255, 0.67)'
-  ctx.lineWidth = 1.1
+  const wash = ctx.createLinearGradient(cx, cy - camera.radius * 0.05, cx, cy + camera.radius * 0.05)
+  wash.addColorStop(0, 'rgba(255, 221, 154, 0.17)')
+  wash.addColorStop(1, 'rgba(137, 215, 224, 0.13)')
+  ctx.fillStyle = wash
+  ctx.lineJoin = 'round'
+  ctx.shadowColor = 'rgba(0, 12, 20, 0.75)'
+  ctx.shadowBlur = 7
   ctx.fill()
+  ctx.shadowBlur = 0
+  ctx.strokeStyle = 'rgba(5, 22, 32, 0.72)'
+  ctx.lineWidth = 2
+  ctx.stroke()
+  ctx.strokeStyle = 'rgba(255, 236, 190, 0.83)'
+  ctx.lineWidth = 0.95
   ctx.stroke()
   ctx.restore()
 }

@@ -9,17 +9,31 @@
 body { @apply bg-page text-slate-900 antialiased; }
 
 .prediction-loading-panel {
+  display: grid;
+  height: 100vh;
+  height: 100dvh;
+  grid-template-rows: minmax(0, 1fr) auto;
   background:
-    radial-gradient(ellipse at 50% 37%, rgb(35 93 157 / 32%), transparent 57%),
-    radial-gradient(circle at 17% 28%, rgb(147 197 253 / 52%) 1px, transparent 2px),
-    radial-gradient(circle at 82% 22%, rgb(186 230 253 / 64%) 1px, transparent 2px),
-    radial-gradient(circle at 74% 55%, rgb(147 197 253 / 45%) 1px, transparent 2px),
-    radial-gradient(circle at 24% 49%, rgb(186 230 253 / 45%) 1px, transparent 2px),
-    linear-gradient(155deg, #0b182c, #060f20);
+    radial-gradient(ellipse at 50% 38%, rgb(25 55 91 / 25%), transparent 62%),
+    linear-gradient(155deg, #081322, #040a15);
 }
 
 .prediction-earth-stage {
-  height: clamp(27rem, 45vw, 37rem);
+  min-height: 0;
+}
+
+.prediction-loading-copy {
+  --prediction-copy-padding: clamp(.55rem, 2dvh, 1.4rem);
+  padding: var(--prediction-copy-padding) max(1rem, env(safe-area-inset-right)) max(var(--prediction-copy-padding), env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+}
+
+.prediction-loading-copy h1 {
+  font-size: clamp(1.15rem, min(5.2vw, 4dvh), 2rem);
+  line-height: 1.15;
+}
+
+.prediction-progress-track {
+  margin-top: clamp(.45rem, 1.7dvh, 1rem);
 }
 
 @media (prefers-reduced-motion: no-preference) {

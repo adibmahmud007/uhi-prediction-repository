@@ -78,18 +78,21 @@ export default function LandingPage() {
   useEffect(() => {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
     if (motion.matches || !window.IntersectionObserver) return undefined
+    const enterThreshold = .12
     const pieces = [...rootRef.current.querySelectorAll('[data-landing-reveal]')]
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(({ target, isIntersecting }) => {
-        if (!isIntersecting) return
-        target.dataset.landingReveal = 'shown'
-        observer.unobserve(target)
+      entries.forEach(({ target, isIntersecting, intersectionRatio }) => {
+        if (!isIntersecting) {
+          target.dataset.landingReveal = 'pending'
+        } else if (intersectionRatio >= enterThreshold) {
+          target.dataset.landingReveal = 'shown'
+        }
       })
-    }, { threshold: .12 })
+    }, { threshold: [0, enterThreshold] })
 
     pieces.forEach((piece) => {
-      if (piece.getBoundingClientRect().top < window.innerHeight) return
-      piece.dataset.landingReveal = 'pending'
+      const { top, bottom } = piece.getBoundingClientRect()
+      piece.dataset.landingReveal = top < window.innerHeight && bottom > 0 ? 'shown' : 'pending'
       observer.observe(piece)
     })
     return () => observer.disconnect()

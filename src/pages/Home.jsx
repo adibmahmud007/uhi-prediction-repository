@@ -16,7 +16,7 @@ const Placeholder = ({ h = 'h-48' }) => (
   </div>
 )
 
-export default function Home({ isRevealing, waitForStartupLogo }) {
+export default function Home({ isRevealing }) {
   return (
     <div className={`grid grid-cols-1 gap-[36px] ${isRevealing ? 'prediction-results-reveal' : ''}`}>
       <section aria-labelledby="metrics-heading" className="space-y-4">
@@ -27,7 +27,7 @@ export default function Home({ isRevealing, waitForStartupLogo }) {
           </div>
         </div>
         <div className="prediction-kpi-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {KPIS.map((metric) => <KpiCard key={metric.id} metric={metric} waitForStartupLogo={waitForStartupLogo} />)}
+          {KPIS.map((metric) => <KpiCard key={metric.id} metric={metric} />)}
         </div>
       </section>
       <div className="prediction-widget-grid grid grid-cols-1 gap-3 lg:grid-cols-12">

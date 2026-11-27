@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowDown, ArrowRight, BookOpen, ChevronDown, Flame, Layers3, MapPin, SlidersHorizontal, Thermometer, TrendingUp } from 'lucide-react'
 import Footer from '../components/Footer'
-import LandingCosmos from '../components/LandingCosmos'
+import SpaceBackdrop from '../components/SpaceBackdrop'
 import { KPIS } from '../config'
 import './LandingPage.css'
 
@@ -122,7 +122,7 @@ export default function LandingPage() {
 
   return (
     <div ref={rootRef} className={`landing-page${leaving ? ' landing-page-leaving' : ''}`}>
-      <LandingCosmos />
+      <SpaceBackdrop />
       <main className="landing-content">
         <section className="landing-hero landing-shell" aria-labelledby="landing-title">
           <div className="landing-hero-content">
@@ -146,13 +146,13 @@ export default function LandingPage() {
         </section>
 
         <section id="explore" className="landing-shell landing-section" aria-labelledby="landing-explore-title">
-          <div className="landing-section-heading" data-landing-reveal>
+          <div className="landing-section-heading" data-landing-reveal data-enter-from="left">
             <p className="landing-eyebrow">Heat indicators</p>
             <h2 id="landing-explore-title">What the heat maps reveal</h2>
           </div>
           <div className="landing-topic-grid">
-            {topics.map(({ icon: Icon, accent, title, text }) => (
-              <article className="landing-glass landing-topic" data-accent={accent} data-landing-reveal key={title}>
+            {topics.map(({ icon: Icon, accent, title, text }, index) => (
+              <article className="landing-glass landing-topic" data-accent={accent} data-landing-reveal data-enter-from={index % 2 === 0 ? 'left' : 'right'} key={title}>
                 <Icon size={23} strokeWidth={1.65} aria-hidden="true" />
                 <h3>{title}</h3>
                 <p>{text}</p>
@@ -162,22 +162,22 @@ export default function LandingPage() {
         </section>
 
         <section className="landing-shell landing-section landing-split" aria-labelledby="landing-demo-title">
-          <div className="landing-section-heading" data-landing-reveal>
+          <div className="landing-section-heading" data-landing-reveal data-enter-from="left">
             <p className="landing-eyebrow">Interactive preview</p>
             <h2 id="landing-demo-title">Two measurements.<br />Two views of heat.</h2>
             <p>Select LST or UHI to see how each measure is presented in the dashboard.</p>
           </div>
-          <div data-landing-reveal><ThermalPreview /></div>
+          <div data-landing-reveal data-enter-from="right"><ThermalPreview /></div>
         </section>
 
         <section className="landing-shell landing-section" aria-labelledby="landing-workflow-title">
-          <div className="landing-section-heading" data-landing-reveal>
+          <div className="landing-section-heading" data-landing-reveal data-enter-from="left">
             <p className="landing-eyebrow">Workflow</p>
             <h2 id="landing-workflow-title">From location to results</h2>
           </div>
           <ol className="landing-steps">
-            {workflow.map(({ icon: Icon, title, text }) => (
-              <li className="landing-step" key={title} data-landing-reveal>
+            {workflow.map(({ icon: Icon, title, text }, index) => (
+              <li className="landing-step" key={title} data-landing-reveal data-enter-from={index % 2 === 0 ? 'left' : 'right'}>
                 <span><Icon size={22} strokeWidth={1.7} aria-hidden="true" /></span>
                 <div><h3>{title}</h3><p>{text}</p></div>
               </li>
@@ -186,12 +186,12 @@ export default function LandingPage() {
         </section>
 
         <section id="documentation" className="landing-shell landing-section landing-split" aria-labelledby="landing-guide-title">
-          <div className="landing-section-heading" data-landing-reveal>
+          <div className="landing-section-heading" data-landing-reveal data-enter-from="left">
             <p className="landing-eyebrow"><BookOpen size={15} aria-hidden="true" /> Documentation</p>
             <h2 id="landing-guide-title">A guide to the dashboard</h2>
             <p>Understand the measures, choose a scenario and know what the demo results represent.</p>
           </div>
-          <div className="landing-glass landing-guide" data-landing-reveal>
+          <div className="landing-glass landing-guide" data-landing-reveal data-enter-from="right">
             {guide.map(({ title, text }) => (
               <details key={title}>
                 <summary>{title}<ChevronDown size={17} aria-hidden="true" /></summary>
@@ -202,7 +202,7 @@ export default function LandingPage() {
         </section>
 
         <section className="landing-shell landing-section landing-final" aria-labelledby="landing-final-title">
-          <div className="landing-glass landing-final-panel" data-landing-reveal>
+          <div className="landing-glass landing-final-panel" data-landing-reveal data-enter-from="right">
             <h2 id="landing-final-title">Explore urban heat in Bangladesh.</h2>
             <Link to="/dashboard" className="landing-primary" onClick={openDashboard}>
               Open Prediction Dashboard <ArrowRight size={19} aria-hidden="true" />

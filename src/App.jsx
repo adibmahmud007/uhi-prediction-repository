@@ -3,9 +3,9 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import FilterBar from './components/FilterBar'
 import PredictionLoading from './components/PredictionLoading'
-import StartupLogoModal from './components/StartupLogoModal'
 import Footer from './components/Footer'
 import ScrollToTopButton from './components/ScrollToTopButton'
+import SpaceBackdrop from './components/SpaceBackdrop'
 import Home from './pages/Home'
 import Detail from './pages/Detail'
 import LandingPage from './pages/LandingPage'
@@ -19,7 +19,6 @@ export default function App() {
   const location = useLocation()
   const navigate = useNavigate()
   const isLanding = location.pathname === '/'
-  const [waitForStartupLogo] = useState(() => !isLanding)
   const isPredicting = predictionPhase === 'predicting'
   const isRevealing = predictionPhase === 'revealing'
 
@@ -63,18 +62,18 @@ export default function App() {
   return (
     <>
       {predictionStatus}
-      {waitForStartupLogo && !window.__startupLogoClosed && <StartupLogoModal />}
       <Sidebar open={open} onClose={() => setOpen(false)} />
       <ScrollToTopButton />
       <div className="flex min-h-screen flex-col">
-        <header className="border-b border-blue-900/60 bg-[#0b1220] font-sans shadow-[0_8px_28px_-16px_rgba(15,23,42,0.5)]">
+        <header className="dashboard-header border-b font-sans">
+          <SpaceBackdrop variant="dashboard" />
           <div className="mx-auto w-full max-w-7xl space-y-5 px-4 py-5 min-[1600px]:w-[88%] min-[1600px]:max-w-none min-[1600px]:px-6">
             <div className="flex min-w-0 items-center gap-3">
-              <button type="button" onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={open} aria-controls="navigation-panel" className="group inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-slate-100 shadow-sm shadow-black/20 transition-[background-color,border-color,box-shadow] duration-200 hover:border-blue-200 hover:bg-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-200 motion-reduce:transition-none">
+              <button type="button" onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={open} aria-controls="navigation-panel" className="dashboard-header-menu group inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-200">
                 <span className="relative block h-4 w-5" aria-hidden="true">
-                  <span className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-slate-800 transition-transform duration-200 motion-reduce:transition-none ${open ? 'translate-y-[7px] rotate-45' : ''}`} />
-                  <span className={`absolute left-0 top-[7px] h-0.5 rounded-full bg-indigo-600 transition-[width,opacity] duration-200 motion-reduce:transition-none ${open ? 'w-5 opacity-0' : 'w-3.5 group-hover:w-5'}`} />
-                  <span className={`absolute bottom-0 left-0 h-0.5 w-5 rounded-full bg-slate-800 transition-transform duration-200 motion-reduce:transition-none ${open ? '-translate-y-[7px] -rotate-45' : ''}`} />
+                  <span className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-sky-50 transition-transform duration-200 motion-reduce:transition-none ${open ? 'translate-y-[7px] rotate-45' : ''}`} />
+                  <span className={`absolute left-0 top-[7px] h-0.5 rounded-full bg-sky-300 transition-[width,opacity] duration-200 motion-reduce:transition-none ${open ? 'w-5 opacity-0' : 'w-3.5 group-hover:w-5'}`} />
+                  <span className={`absolute bottom-0 left-0 h-0.5 w-5 rounded-full bg-sky-50 transition-transform duration-200 motion-reduce:transition-none ${open ? '-translate-y-[7px] -rotate-45' : ''}`} />
                 </span>
               </button>
               <img src="/logo-header-dark-bg.png" alt="Urban Heat Island Analytics logo" width={44} height={44} className="h-11 w-11 shrink-0 object-contain" />
@@ -83,14 +82,14 @@ export default function App() {
                 <p className="mt-1 text-xs font-medium leading-5 text-blue-100/85 sm:text-sm">Predicted LST and UHI for <span className="font-semibold text-blue-50">Dhaka</span> and <span className="font-semibold text-blue-50">Sylhet</span></p>
               </div>
             </div>
-            <div className="border-t border-white/10 pt-4">
+            <div className="p-3 sm:px-4">
               <FilterBar onRunPrediction={runPrediction} />
             </div>
           </div>
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-4 min-[1600px]:w-[88%] min-[1600px]:max-w-none min-[1600px]:px-6">
           <Routes>
-            <Route path="/dashboard" element={<Home isRevealing={isRevealing} waitForStartupLogo={waitForStartupLogo} />} />
+            <Route path="/dashboard" element={<Home isRevealing={isRevealing} />} />
             <Route path="/:id" element={<Detail />} />
           </Routes>
         </main>

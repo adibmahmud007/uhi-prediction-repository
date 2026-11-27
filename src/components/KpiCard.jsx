@@ -39,41 +39,19 @@ function decimalsFor(value) {
   return decimal?.length || 0
 }
 
-export default function KpiCard({ metric, waitForStartupLogo = true }) {
+export default function KpiCard({ metric }) {
   const { label, value, unit, description } = metric
   const settings = gaugeSettings[metric.id] || gaugeSettings['water-bodies']
   const originalValue = Number.parseFloat(value)
   const decimals = decimalsFor(value)
-  const targetPercent = ((originalValue - settings.min) / (settings.max - settings.min)) * 100
-  const [percent, setPercent] = useState(() => (
-    waitForStartupLogo && !window.__startupLogoClosed ? 0 : Math.min(100, Math.max(0, targetPercent))
-  ))
+  const targetPercent = Math.min(100, Math.max(0, ((originalValue - settings.min) / (settings.max - settings.min)) * 100))
+  const [percent, setPercent] = useState(targetPercent)
   const [dragging, setDragging] = useState(false)
   const svgRef = useRef(null)
 
   useEffect(() => {
-    let frame
-    let settleTimer
-
-    const runStartupSweep = () => {
-      setPercent(0)
-      frame = requestAnimationFrame(() => setPercent(100))
-      settleTimer = window.setTimeout(
-        () => setPercent(Math.min(100, Math.max(0, targetPercent))),
-        900,
-      )
-    }
-
-    window.addEventListener('startup-logo-closed', runStartupSweep)
-    if (!waitForStartupLogo || window.__startupLogoClosed) {
-      setPercent(Math.min(100, Math.max(0, targetPercent)))
-    }
-    return () => {
-      window.removeEventListener('startup-logo-closed', runStartupSweep)
-      cancelAnimationFrame(frame)
-      window.clearTimeout(settleTimer)
-    }
-  }, [targetPercent, waitForStartupLogo])
+    setPercent(targetPercent)
+  }, [targetPercent])
 
   const displayedValue = useMemo(
     () => settings.min + ((settings.max - settings.min) * percent) / 100,

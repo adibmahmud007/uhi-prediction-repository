@@ -1,0 +1,215 @@
+.space-backdrop {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.space-starfield,
+.space-earth,
+.space-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.space-earth-system {
+  position: absolute;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) translateY(var(--earth-drop, 0vh)) scale(var(--earth-scale, 1));
+}
+
+.space-moon {
+  position: absolute;
+  width: 9%;
+  height: auto;
+  translate: 0 var(--moon-float, 0px);
+}
+
+.space-backdrop--landing {
+  position: fixed;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 77% 49%, rgb(24 65 117 / 37%), transparent 57%),
+    radial-gradient(ellipse at 94% 81%, rgb(117 39 52 / 19%), transparent 46%),
+    #050c18;
+}
+
+.space-backdrop--landing .space-earth-system {
+  top: 45%;
+  left: 71%;
+  width: min(74vw, 68rem);
+}
+
+.space-backdrop--landing .space-moon { top: 12%; left: 76%; }
+
+.space-backdrop--landing .space-scrim {
+  background:
+    linear-gradient(90deg, rgb(5 12 24 / 95%) 0%, rgb(5 12 24 / 73%) 25%, rgb(5 12 24 / 12%) 61%, transparent 75%),
+    linear-gradient(0deg, rgb(5 12 24 / 70%), transparent 52%);
+}
+
+.space-backdrop--dashboard {
+  position: absolute;
+  z-index: -1;
+}
+
+.space-backdrop--dashboard .space-earth-system {
+  top: 79%;
+  left: 85%;
+  width: clamp(17rem, 37vw, 29rem);
+  opacity: .64;
+}
+
+.space-backdrop--dashboard .space-moon {
+  top: 15%;
+  left: 6%;
+  width: 10%;
+}
+
+.space-backdrop--dashboard .space-starfield { opacity: .62; }
+
+.space-backdrop--dashboard .space-scrim {
+  background:
+    linear-gradient(90deg, rgb(6 16 31 / 72%), transparent 72%),
+    linear-gradient(0deg, rgb(6 16 31 / 60%), transparent 80%);
+}
+
+.space-craft {
+  position: absolute;
+  opacity: .8;
+}
+
+.space-satellite {
+  top: 31%;
+  left: clamp(7.2rem, 16vw, 17rem);
+  width: 4.9rem;
+  height: 2.2rem;
+  transform: rotate(-18deg);
+  filter: drop-shadow(0 4px 6px #010916);
+}
+
+.space-satellite::before,
+.space-satellite::after {
+  position: absolute;
+  top: 39%;
+  width: 37%;
+  height: 34%;
+  border: 1px solid #98bed8;
+  border-radius: 1px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 5px, #b7dbef8c 5px 6px),
+    linear-gradient(0deg, #182e53 45%, #779cc3 48% 52%, #3f6896 55%);
+  box-shadow: inset 0 1px 1px #cff3ff45;
+  content: "";
+}
+
+.space-satellite::before { left: 0; }
+.space-satellite::after { right: 0; }
+
+.space-satellite-body {
+  position: absolute;
+  top: 28%;
+  left: 37%;
+  width: 26%;
+  height: 52%;
+  border-radius: 4px;
+  background: linear-gradient(141deg, #fff2d7, #adc7db 38%, #66798e 73%, #293a51);
+  box-shadow: inset 0 -2px 3px #1e2b3e90;
+}
+
+.space-satellite-dish {
+  position: absolute;
+  top: 8%;
+  left: 47%;
+  width: 21%;
+  height: 22%;
+  transform: rotate(22deg);
+  border-radius: 0 0 70% 70%;
+  background: linear-gradient(165deg, #e4edf5, #98b2ce 46%, #586b82);
+}
+
+.space-satellite-dish::after {
+  position: absolute;
+  bottom: -4px;
+  left: 25%;
+  width: 2px;
+  height: 6px;
+  transform: rotate(22deg);
+  background: #9cb2c3;
+  content: "";
+}
+
+.space-rocket {
+  top: 32%;
+  left: clamp(2.3rem, 6vw, 8rem);
+  width: 1.75rem;
+  height: 3.15rem;
+  transform: rotate(28deg);
+  filter: drop-shadow(0 3px 5px rgb(4 12 26 / 65%));
+}
+
+.space-rocket-fins {
+  position: absolute;
+  inset: 43% 7% 19%;
+  background: linear-gradient(90deg, #832e41, #eb9b7e 47%, #713140);
+  clip-path: polygon(30% 6%, 70% 6%, 100% 100%, 0% 100%);
+}
+
+.space-rocket-body {
+  position: absolute;
+  z-index: 1;
+  inset: 0 23% 23%;
+  background: linear-gradient(90deg, #7d8ba0, #f3f4e9 39%, #dfe8ec 65%, #63788e);
+  clip-path: polygon(50% 0, 70% 10%, 88% 24%, 95% 43%, 85% 91%, 70% 100%, 30% 100%, 15% 91%, 5% 43%, 12% 24%, 30% 10%);
+}
+
+.space-rocket-body::after {
+  position: absolute;
+  inset: 29% 31% auto;
+  aspect-ratio: 1;
+  border: 1px solid #8faec0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #84cde9, #274a62 55%, #14273c);
+  content: "";
+}
+
+.space-rocket::after {
+  position: absolute;
+  inset: 71% 35% 0;
+  border-radius: 32% 32% 50% 50%;
+  background: linear-gradient(#fff0c9, #fca165 36%, #d35456 68%, transparent);
+  filter: blur(.6px) drop-shadow(0 3px 5px #ff925f80);
+  content: "";
+}
+
+@media (max-width: 56.99rem) {
+  .space-backdrop--landing .space-earth-system { top: 38%; left: 57%; width: min(128vw, 57rem); }
+  .space-backdrop--landing .space-moon { top: 11%; left: 70%; }
+  .space-backdrop--landing .space-scrim { background: linear-gradient(90deg, #050c18bd, #050c1852), linear-gradient(0deg, #050c18db, transparent 55%); }
+  .space-backdrop--dashboard .space-earth-system { top: 54%; left: 81%; }
+  .space-backdrop--dashboard .space-satellite { top: 21%; left: 24%; width: 4rem; }
+  .space-backdrop--dashboard .space-rocket { top: 24%; left: 7%; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .space-backdrop--dashboard .space-earth-system { animation: header-earth-float 8s ease-in-out infinite; }
+  .space-satellite { animation: satellite-drift 10s ease-in-out infinite alternate; }
+  .space-rocket { animation: rocket-drift 8s ease-in-out infinite alternate; }
+  .space-backdrop[data-offscreen="true"] :is(.space-earth-system, .space-craft) { animation-play-state: paused; }
+
+  @keyframes header-earth-float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -12px; }
+  }
+
+  @keyframes satellite-drift {
+    from { transform: translate(-.35rem, .25rem) rotate(-20deg); }
+    to { transform: translate(.6rem, -.4rem) rotate(-13deg); }
+  }
+
+  @keyframes rocket-drift {
+    from { transform: translate(-.35rem, .4rem) rotate(26deg); }
+    to { transform: translate(.45rem, -.55rem) rotate(31deg); }
+  }
+}

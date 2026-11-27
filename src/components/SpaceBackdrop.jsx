@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { createEarthRenderer, createSoftwareEarth, loadEarthImage } from '../predictionEarth'
 import { drawStarfield, getMoonSprite } from '../predictionSpace'
+import './SpaceBackdrop.css'
 
 const radians = Math.PI / 180
 
-export default function LandingCosmos() {
+export default function SpaceBackdrop({ variant = 'landing' }) {
+  const isHeader = variant === 'dashboard'
   const sceneRef = useRef(null)
   const systemRef = useRef(null)
   const earthRef = useRef(null)
@@ -27,6 +29,7 @@ export default function LandingCosmos() {
     let softwareEarth
     let asset
     let disposed = false
+    let inView = true
     let lastPaint = 0
     let time = 0
     let scroll = 0
@@ -47,15 +50,20 @@ export default function LandingCosmos() {
         time += delta / 1000
       }
 
-      system.style.setProperty('--earth-drop', `${(scroll * 31).toFixed(2)}vh`)
-      system.style.setProperty('--earth-scale', (1 - scroll * .28).toFixed(3))
+      if (!isHeader) {
+        system.style.setProperty('--earth-drop', `${(scroll * 31).toFixed(2)}vh`)
+        system.style.setProperty('--earth-scale', (1 - scroll * .28).toFixed(3))
+      }
       moon.style.setProperty('--moon-float', `${(Math.sin(time * .95) * 5).toFixed(2)}px`)
       if (skyContext) drawStarfield(skyContext, time / 14 + scroll * 2.2, .86)
 
-      if (now - paintEarthAt >= (softwareEarth && !motion.matches ? 32 : 0)) {
+      const shouldPaintEarth = isHeader
+        ? paintEarthAt === -Infinity
+        : now - paintEarthAt >= (softwareEarth && !motion.matches ? 32 : 0)
+      if (shouldPaintEarth) {
         const camera = {
           latitude: 19 * radians,
-          longitude: 79 * radians + time * .115 + scroll * Math.PI * 2,
+          longitude: 79 * radians + (isHeader ? 0 : time * .115 + scroll * Math.PI * 2),
           radius: earth.width * .405,
           approach: 0,
         }
@@ -67,11 +75,11 @@ export default function LandingCosmos() {
         paintEarthAt = now
       }
 
-      if (!document.hidden && !motion.matches) frame = requestAnimationFrame(draw)
+      if (inView && !document.hidden && !motion.matches) frame = requestAnimationFrame(draw)
     }
 
     const redraw = () => {
-      if (!frame && !document.hidden) frame = requestAnimationFrame(draw)
+      if (!frame && inView && !document.hidden) frame = requestAnimationFrame(draw)
     }
 
     const readScroll = () => {
@@ -88,7 +96,8 @@ export default function LandingCosmos() {
       sky.width = Math.max(1, Math.round(scene.clientWidth * skyRatio))
       sky.height = Math.max(1, Math.round(scene.clientHeight * skyRatio))
       paintEarthAt = -Infinity
-      readScroll()
+      if (isHeader) redraw()
+      else readScroll()
     }
 
     const recover = () => {
@@ -109,7 +118,7 @@ export default function LandingCosmos() {
     })
 
     const syncVisibility = () => {
-      if (document.hidden) {
+      if (document.hidden || !inView) {
         cancelAnimationFrame(frame)
         frame = 0
       } else {
@@ -121,7 +130,15 @@ export default function LandingCosmos() {
     const observer = new ResizeObserver(resize)
     observer.observe(scene)
     observer.observe(system)
-    window.addEventListener('scroll', readScroll, { passive: true })
+    const viewportObserver = isHeader && window.IntersectionObserver
+      ? new IntersectionObserver(([entry]) => {
+          inView = entry.isIntersecting
+          scene.dataset.offscreen = String(!inView)
+          syncVisibility()
+        })
+      : null
+    viewportObserver?.observe(scene)
+    if (!isHeader) window.addEventListener('scroll', readScroll, { passive: true })
     document.addEventListener('visibilitychange', syncVisibility)
     motion.addEventListener('change', redraw)
     earth.addEventListener('webglcontextlost', recover)
@@ -131,23 +148,36 @@ export default function LandingCosmos() {
       disposed = true
       cancelAnimationFrame(frame)
       observer.disconnect()
+      viewportObserver?.disconnect()
       window.removeEventListener('scroll', readScroll)
       document.removeEventListener('visibilitychange', syncVisibility)
       motion.removeEventListener('change', redraw)
       earth.removeEventListener('webglcontextlost', recover)
       renderer?.dispose()
     }
-  }, [])
+  }, [isHeader])
 
   return (
-    <div ref={sceneRef} className="landing-cosmos" aria-hidden="true">
-      <canvas ref={skyRef} className="landing-starfield" />
-      <div ref={systemRef} className="landing-earth-system">
-        <canvas ref={moonRef} className="landing-moon" width={144} height={144} />
-        <canvas ref={earthRef} className="landing-earth" />
-        <canvas ref={fallbackRef} className="landing-earth" />
+    <div ref={sceneRef} className={`space-backdrop space-backdrop--${variant}`} aria-hidden="true">
+      <canvas ref={skyRef} className="space-starfield" />
+      <div ref={systemRef} className="space-earth-system">
+        <canvas ref={moonRef} className="space-moon" width={144} height={144} />
+        <canvas ref={earthRef} className="space-earth" />
+        <canvas ref={fallbackRef} className="space-earth" />
       </div>
-      <div className="landing-cosmos-scrim" />
+      <div className="space-scrim" />
+      {isHeader && (
+        <>
+          <span className="space-craft space-satellite">
+            <span className="space-satellite-body" />
+            <span className="space-satellite-dish" />
+          </span>
+          <span className="space-craft space-rocket">
+            <span className="space-rocket-fins" />
+            <span className="space-rocket-body" />
+          </span>
+        </>
+      )}
     </div>
   )
 }
